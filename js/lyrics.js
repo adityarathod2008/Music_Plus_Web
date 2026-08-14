@@ -14,8 +14,20 @@ class LyricsSync {
         window.addEventListener('timeupdate', () => this.sync());
     }
 
-    loadLyrics(lyricsArray) {
-        this.currentLyrics = lyricsArray || [];
+    loadLyrics(lyricsData) {
+        if (typeof lyricsData === 'string') {
+            // Plain text fallback: distribute evenly across song duration for auto-scroll
+            const lines = lyricsData.split('\n').filter(l => l.trim().length > 0);
+            const duration = this.audio.duration || 180; // fallback to 3 mins
+            const timePerLine = duration / (lines.length || 1);
+            
+            this.currentLyrics = lines.map((text, i) => {
+                return { time: i * timePerLine, text: text.trim() };
+            });
+        } else {
+            this.currentLyrics = lyricsData || [];
+        }
+        
         this.currentIndex = -1;
         this.render();
     }
@@ -25,13 +37,18 @@ class LyricsSync {
         this.container.innerHTML = '';
         
         if (this.currentLyrics.length === 0) {
-            this.container.innerHTML = '<p class="active-lyric">No lyrics available for this song.</p>';
+            this.container.innerHTML = '<p class="active-lyric" style="text-align: center; margin-top: 40px; font-weight: 300; opacity: 0.7;">No lyrics available for this song.</p>';
             return;
         }
+
+        // Add padding at top and bottom so first/last lines can reach center
+        this.container.style.paddingTop = '50vh';
+        this.container.style.paddingBottom = '50vh';
 
         this.currentLyrics.forEach((line, index) => {
             const p = document.createElement('p');
             p.id = `lyric-line-${index}`;
+            p.className = 'lyric-line';
             p.textContent = line.text;
             this.container.appendChild(p);
         });

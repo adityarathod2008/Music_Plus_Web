@@ -394,8 +394,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         lyricsSync.loadLyrics(parsedLyrics);
                         song.lyrics = parsedLyrics; // cache it
                     } else if (data && data.plainLyrics) {
-                        // fallback to plain lyrics if synced isn't available
-                        document.getElementById('lyrics-content').innerHTML = `<p style="white-space: pre-wrap; text-align: center; color: var(--text-base); padding: 20px; line-height: 2;">${data.plainLyrics}</p>`;
+                        // fallback to plain lyrics (lyrics.js will auto-scroll it)
+                        lyricsSync.loadLyrics(data.plainLyrics);
+                        song.lyrics = data.plainLyrics;
                     } else {
                         lyricsSync.loadLyrics([]);
                     }
@@ -444,6 +445,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         lyricsBtn.addEventListener('click', () => openDrawer('lyrics'));
         queueBtn.addEventListener('click', () => openDrawer('queue'));
         closeDrawerBtn.addEventListener('click', () => app.classList.remove('drawer-open'));
+        
+        // On mobile, tap the mini-player to open the visualizer/now playing drawer
+        const nowPlayingInfo = document.querySelector('.now-playing-info');
+        if (nowPlayingInfo) {
+            nowPlayingInfo.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && !e.target.closest('.like-btn')) {
+                    openDrawer('viz');
+                }
+            });
+        }
         
         // Download Button
         const downloadBtn = document.getElementById('download-btn');
