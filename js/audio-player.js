@@ -80,6 +80,10 @@ class AudioPlayer {
             this.duration = this.ytPlayer.getDuration();
             this.totalTimeEl.textContent = this.formatTime(this.duration);
             
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'playing';
+            }
+            
             if (this.timeUpdateInterval) clearInterval(this.timeUpdateInterval);
             this.timeUpdateInterval = setInterval(() => {
                 this.updateProgress();
@@ -94,6 +98,10 @@ class AudioPlayer {
             this.isPlaying = false;
             this.playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
             if (this.timeUpdateInterval) clearInterval(this.timeUpdateInterval);
+            
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'paused';
+            }
             
         } else if (event.data === YT.PlayerState.ENDED) {
             this.handleSongEnd();
@@ -227,10 +235,25 @@ class AudioPlayer {
                 ]
             });
             
-            navigator.mediaSession.setActionHandler('play', () => this.togglePlay());
-            navigator.mediaSession.setActionHandler('pause', () => this.togglePlay());
+            navigator.mediaSession.setActionHandler('play', () => { if(!this.isPlaying) this.togglePlay(); });
+            navigator.mediaSession.setActionHandler('pause', () => { if(this.isPlaying) this.togglePlay(); });
             navigator.mediaSession.setActionHandler('previoustrack', () => this.playPrev());
             navigator.mediaSession.setActionHandler('nexttrack', () => this.playNext());
+            navigator.mediaSession.setActionHandler('seekto', (details) => {
+                if(this.ytPlayer) this.ytPlayer.seekTo(details.seekTime, true);
+            });
+            navigator.mediaSession.setActionHandler('seekforward', (details) => {
+                if(this.ytPlayer) {
+                    const ct = this.ytPlayer.getCurrentTime() || 0;
+                    this.ytPlayer.seekTo(ct + (details.seekOffset || 10), true);
+                }
+            });
+            navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+                if(this.ytPlayer) {
+                    const ct = this.ytPlayer.getCurrentTime() || 0;
+                    this.ytPlayer.seekTo(Math.max(ct - (details.seekOffset || 10), 0), true);
+                }
+            });
         }
         
         this.onSongChangeCallbacks.forEach(cb => cb(song));
@@ -384,6 +407,16 @@ class AudioPlayer {
         const progressPercent = (currentTime / this.duration) * 100;
         this.progressBarFill.style.width = `${progressPercent}%`;
         this.currentTimeEl.textContent = this.formatTime(currentTime);
+
+        if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
+            try {
+                navigator.mediaSession.setPositionState({
+                    duration: this.duration,
+                    playbackRate: this.ytPlayer.getPlaybackRate() || 1,
+                    position: currentTime
+                });
+            } catch (e) {}
+        }
     }
 
     seek(e) {
