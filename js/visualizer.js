@@ -1,15 +1,12 @@
 class AudioVisualizer {
-    constructor(audioElement) {
-        this.audioElement = audioElement;
+    constructor(audioPlayer) {
+        this.audioPlayer = audioPlayer;
         this.canvas = document.getElementById('visualizer-canvas');
         if (!this.canvas) return;
         this.ctx = this.canvas.getContext('2d');
         
-        this.audioContext = null;
-        this.analyser = null;
-        this.source = null;
-        this.dataArray = null;
-        this.bufferLength = null;
+        this.bufferLength = 128;
+        this.dataArray = new Uint8Array(this.bufferLength);
         
         this.initialized = false;
         this.mode = 'bars'; // 'bars', 'wave', 'circle'
@@ -26,25 +23,8 @@ class AudioVisualizer {
 
     init() {
         if (this.initialized) return;
-        
-        try {
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            this.analyser = this.audioContext.createAnalyser();
-            
-            // Connect to source
-            this.source = this.audioContext.createMediaElementSource(this.audioElement);
-            this.source.connect(this.analyser);
-            this.analyser.connect(this.audioContext.destination);
-            
-            this.analyser.fftSize = 256;
-            this.bufferLength = this.analyser.frequencyBinCount;
-            this.dataArray = new Uint8Array(this.bufferLength);
-            
-            this.initialized = true;
-            this.draw();
-        } catch (e) {
-            console.error('AudioContext initialization failed', e);
-        }
+        this.initialized = true;
+        this.draw();
     }
 
     resize() {
@@ -65,17 +45,14 @@ class AudioVisualizer {
         
         this.animationId = requestAnimationFrame(() => this.draw());
         
-        if (this.mode === 'wave') {
-            this.analyser.getByteTimeDomainData(this.dataArray);
-        } else {
-            this.analyser.getByteFrequencyData(this.dataArray);
-        }
+        // FAKE VISUALIZER
+        // Since we are using YouTube Iframe API (cross-origin), we cannot read real audio frequencies.
+        // We simulate aesthetic visualizer bars when the audio is playing.
+        const t = Date.now() / 200;
+        const isPlaying = this.audioPlayer && this.audioPlayer.isPlaying;
         
-        // FAKE VISUALIZER FALLBACK FOR CORS-BLOCKED STREAMS
-        // If the audio is playing but the analyser returns all 0s (CORS block)
-        if (!this.audioElement.paused && this.dataArray[0] === 0 && this.dataArray[this.bufferLength-1] === 0 && this.dataArray[Math.floor(this.bufferLength/2)] === 0) {
-            const t = Date.now() / 200;
-            for (let i = 0; i < this.bufferLength; i++) {
+        for (let i = 0; i < this.bufferLength; i++) {
+            if (isPlaying) {
                 if (this.mode === 'wave') {
                     // Simulate waveform (128 is center)
                     this.dataArray[i] = 128 + (Math.sin(t + i*0.1) * 40) + (Math.random() * 20 - 10);
@@ -83,6 +60,13 @@ class AudioVisualizer {
                     // Simulate frequency bars
                     const val = Math.max(0, Math.sin(t + i*0.1) * 150 + Math.random() * 100);
                     this.dataArray[i] = val;
+                }
+            } else {
+                // If paused, decay to 0/center slowly
+                if (this.mode === 'wave') {
+                    this.dataArray[i] += (128 - this.dataArray[i]) * 0.1;
+                } else {
+                    this.dataArray[i] *= 0.8;
                 }
             }
         }

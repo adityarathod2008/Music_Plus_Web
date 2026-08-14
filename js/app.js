@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // Initialize components
     const audioPlayer = new AudioPlayer();
-    const visualizer = new AudioVisualizer(audioPlayer.audio);
-    const lyricsSync = new LyricsSync(audioPlayer.audio);
+    const visualizer = new AudioVisualizer(audioPlayer);
+    const lyricsSync = new LyricsSync(audioPlayer);
     
     // UI Elements
     const app = document.getElementById('app');

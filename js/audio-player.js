@@ -1,6 +1,5 @@
 class AudioPlayer {
     constructor() {
-        this.audio = document.getElementById('main-audio');
         this.isPlaying = false;
         this.isMuted = false;
         this.currentSongIndex = 0;
@@ -8,6 +7,7 @@ class AudioPlayer {
         this.shuffle = false;
         this.repeat = 'none'; // 'none', 'all', 'one'
         this.volume = 1;
+        this.duration = 0;
         
         // DOM Elements
         this.playPauseBtn = document.getElementById('play-pause-btn');
@@ -35,8 +35,77 @@ class AudioPlayer {
         this.drawerArtist = document.getElementById('drawer-artist');
         
         this.onSongChangeCallbacks = [];
+        this.timeUpdateInterval = null;
         
+        // Wait for YT API
+        window.onYouTubeIframeAPIReady = () => {
+            this.ytPlayer = new YT.Player('yt-player', {
+                height: '0',
+                width: '0',
+                videoId: '',
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 0,
+                    'disablekb': 1,
+                    'fs': 0,
+                    'playsinline': 1
+                },
+                events: {
+                    'onReady': (e) => this.onPlayerReady(e),
+                    'onStateChange': (e) => this.onPlayerStateChange(e),
+                    'onError': (e) => this.onPlayerError(e)
+                }
+            });
+        };
+        
+        // In case YT API is already loaded
+        if (window.YT && window.YT.Player) {
+            window.onYouTubeIframeAPIReady();
+        }
+    }
+
+    get currentTime() {
+        return this.ytPlayer ? this.ytPlayer.getCurrentTime() || 0 : 0;
+    }
+
+    onPlayerReady(event) {
         this.init();
+    }
+    
+    onPlayerStateChange(event) {
+        // YT.PlayerState.PLAYING = 1, PAUSED = 2, ENDED = 0, BUFFERING = 3
+        if (event.data === YT.PlayerState.PLAYING) {
+            this.isPlaying = true;
+            this.playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            this.duration = this.ytPlayer.getDuration();
+            this.totalTimeEl.textContent = this.formatTime(this.duration);
+            
+            if (this.timeUpdateInterval) clearInterval(this.timeUpdateInterval);
+            this.timeUpdateInterval = setInterval(() => {
+                this.updateProgress();
+                window.dispatchEvent(new Event('timeupdate'));
+                const currentTime = this.ytPlayer.getCurrentTime();
+                if (Math.floor(currentTime) % 5 === 0) {
+                    this.saveSession();
+                }
+            }, 500);
+            
+        } else if (event.data === YT.PlayerState.PAUSED) {
+            this.isPlaying = false;
+            this.playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            if (this.timeUpdateInterval) clearInterval(this.timeUpdateInterval);
+            
+        } else if (event.data === YT.PlayerState.ENDED) {
+            this.handleSongEnd();
+            
+        } else if (event.data === YT.PlayerState.BUFFERING) {
+            this.playPauseBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        }
+    }
+    
+    onPlayerError(event) {
+        console.error("YouTube Player Error:", event.data);
+        setTimeout(() => this.playNext(), 2000);
     }
 
     init() {
@@ -47,27 +116,6 @@ class AudioPlayer {
         this.shuffleBtn.addEventListener('click', () => this.toggleShuffle());
         this.repeatBtn.addEventListener('click', () => this.toggleRepeat());
         this.muteBtn.addEventListener('click', () => this.toggleMute());
-        
-        this.audio.addEventListener('timeupdate', () => {
-            this.updateProgress();
-            // Throttle saveSession to every 5 seconds to avoid excessive writes
-            if (Math.floor(this.audio.currentTime) % 5 === 0) {
-                this.saveSession();
-            }
-        });
-        this.audio.addEventListener('ended', () => this.handleSongEnd());
-        this.audio.addEventListener('loadedmetadata', () => {
-            this.totalTimeEl.textContent = this.formatTime(this.audio.duration);
-        });
-        
-        // Loading states
-        this.audio.addEventListener('waiting', () => {
-            this.playPauseBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        });
-        this.audio.addEventListener('playing', () => {
-            this.isPlaying = true;
-            this.playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-        });
 
         this.progressBarBg.addEventListener('click', (e) => this.seek(e));
         this.volumeBarBg.addEventListener('click', (e) => this.setVolume(e));
@@ -76,25 +124,44 @@ class AudioPlayer {
         document.addEventListener('keydown', (e) => {
             if (e.target.tagName === 'INPUT') return;
             if (e.code === 'Space') { e.preventDefault(); this.togglePlay(); }
-            if (e.code === 'ArrowRight') { this.audio.currentTime += 5; }
-            if (e.code === 'ArrowLeft') { this.audio.currentTime -= 5; }
-            if (e.code === 'ArrowUp') { this.audio.volume = Math.min(1, this.audio.volume + 0.1); this.updateVolumeUI(); }
-            if (e.code === 'ArrowDown') { this.audio.volume = Math.max(0, this.audio.volume - 0.1); this.updateVolumeUI(); }
+            if (e.code === 'ArrowRight') { 
+                const ct = this.ytPlayer.getCurrentTime() || 0;
+                this.ytPlayer.seekTo(ct + 5, true); 
+            }
+            if (e.code === 'ArrowLeft') { 
+                const ct = this.ytPlayer.getCurrentTime() || 0;
+                this.ytPlayer.seekTo(ct - 5, true); 
+            }
+            if (e.code === 'ArrowUp') { 
+                this.volume = Math.min(1, this.volume + 0.1); 
+                this.ytPlayer.setVolume(this.volume * 100); 
+                this.updateVolumeUI(); 
+            }
+            if (e.code === 'ArrowDown') { 
+                this.volume = Math.max(0, this.volume - 0.1); 
+                this.ytPlayer.setVolume(this.volume * 100); 
+                this.updateVolumeUI(); 
+            }
         });
+        
+        // Initial volume
+        this.ytPlayer.setVolume(this.volume * 100);
         
         // Initialize Session or Default Queue
         this.loadSession();
     }
     
     saveSession() {
-        if (!this.queue || this.queue.length === 0) return;
-        const sessionData = {
-            queue: this.queue,
-            currentIndex: this.currentSongIndex,
-            currentTime: this.audio.currentTime,
-            timestamp: Date.now()
-        };
-        localStorage.setItem('musicplus_session', JSON.stringify(sessionData));
+        if (!this.queue || this.queue.length === 0 || !this.ytPlayer) return;
+        try {
+            const sessionData = {
+                queue: this.queue,
+                currentIndex: this.currentSongIndex,
+                currentTime: this.ytPlayer.getCurrentTime() || 0,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('musicplus_session', JSON.stringify(sessionData));
+        } catch(e) {}
     }
     
     loadSession() {
@@ -105,17 +172,13 @@ class AudioPlayer {
                 if (session.queue && session.queue.length > 0) {
                     this.queue = session.queue;
                     this.currentSongIndex = session.currentIndex || 0;
-                    this.loadSong(this.queue[this.currentSongIndex]);
                     
-                    // Restore time once metadata is loaded
                     const timeToRestore = session.currentTime || 0;
-                    const onMeta = () => {
-                        this.audio.currentTime = timeToRestore;
-                        this.audio.removeEventListener('loadedmetadata', onMeta);
-                    };
-                    this.audio.addEventListener('loadedmetadata', onMeta);
+                    const song = this.queue[this.currentSongIndex];
+                    if (song) {
+                        this.loadSong(song, timeToRestore);
+                    }
                     
-                    // Render queue in UI if available
                     if (typeof renderQueue === 'function') {
                         renderQueue();
                     }
@@ -133,9 +196,16 @@ class AudioPlayer {
         }
     }
 
-    loadSong(song) {
-        if(!song) return;
-        this.audio.src = song.src;
+    loadSong(song, startSeconds = 0) {
+        if(!song || !this.ytPlayer) return;
+        
+        if (song.id.startsWith('s')) {
+            // Local fallback song - skip it
+            this.playNext();
+            return;
+        }
+
+        this.ytPlayer.loadVideoById({videoId: song.id, startSeconds: startSeconds});
         this.trackTitle.textContent = song.title;
         this.trackArtist.textContent = song.artist;
         this.trackCover.src = song.cover;
@@ -172,22 +242,14 @@ class AudioPlayer {
             this.loadSong(song);
             this.addToListeningHistory(song);
         }
-        this.audio.play().then(() => {
-            this.isPlaying = true;
-            this.playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-        }).catch(err => console.log('Autoplay prevented', err));
     }
 
     togglePlay() {
-        if (this.queue.length === 0) return;
+        if (!this.ytPlayer || this.queue.length === 0) return;
         if (this.isPlaying) {
-            this.audio.pause();
-            this.isPlaying = false;
-            this.playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            this.ytPlayer.pauseVideo();
         } else {
-            this.audio.play();
-            this.isPlaying = true;
-            this.playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            this.ytPlayer.playVideo();
         }
     }
 
@@ -203,13 +265,11 @@ class AudioPlayer {
             this.playSong(this.queue[this.currentSongIndex], this.currentSongIndex);
         } else {
             this.currentSongIndex++;
-            // Check if we need to buffer more songs (if less than 10 songs remain)
             if (this.queue.length - this.currentSongIndex <= 10) {
                 this.bufferUpcomingSongs();
             }
             
             if (this.currentSongIndex >= this.queue.length) {
-                // If it still runs out despite buffering, just wait for buffer to finish
                 this.playPauseBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
                 await this.bufferUpcomingSongs();
             }
@@ -222,18 +282,13 @@ class AudioPlayer {
     addToListeningHistory(song) {
         try {
             let history = JSON.parse(localStorage.getItem('listeningHistory') || '[]');
-            // Remove if already exists so we can push it to the top
             history = history.filter(s => s.id !== song.id);
             history.unshift(song);
-            // Keep only last 50 songs
             if (history.length > 50) history.pop();
             localStorage.setItem('listeningHistory', JSON.stringify(history));
             
-            // Dispatch event for UI to update "Made for you" if needed
             window.dispatchEvent(new CustomEvent('listeningHistoryUpdated'));
-        } catch(e) {
-            console.error("Failed to save history", e);
-        }
+        } catch(e) {}
     }
 
     async bufferUpcomingSongs() {
@@ -243,39 +298,26 @@ class AudioPlayer {
         try {
             const lastSong = this.queue[this.queue.length - 1] || this.queue[this.currentSongIndex];
             
-            if (lastSong && lastSong.id) {
-                // Fetch related songs using the YouTube algorithm
+            if (lastSong && lastSong.id && !lastSong.id.startsWith('s')) {
                 const response = await fetch(`${BACKEND_URL}/related?video_id=${lastSong.id}`);
                 const data = await response.json();
                 
                 if (data.results && data.results.length > 0) {
                     const existingIds = new Set(this.queue.map(s => s.id));
-                    const newSongs = data.results.filter(s => {
-                        if (existingIds.has(s.id)) return false;
-                        return true;
-                    });
+                    const newSongs = data.results.filter(s => !existingIds.has(s.id));
                     
-                    // Add up to 10 new songs to the queue buffer
                     const songsToAdd = newSongs.slice(0, 10);
                     for (const song of songsToAdd) {
-                        if (!song.src) {
-                            song.src = `${BACKEND_URL}/stream/${song.id}`;
-                        }
                         this.queue.push(song);
                     }
                 }
             } else {
-                // Fallback to trending search if no last song
                 const response = await fetch(`${BACKEND_URL}/search?q=trending+music`);
                 const data = await response.json();
                 if (data.results && data.results.length > 0) {
                     for (const song of data.results.slice(0, 5)) {
-                        if (!song.src) song.src = `${BACKEND_URL}/stream/${song.id}`;
                         this.queue.push(song);
                     }
-                } else {
-                    const randomFallback = songs[Math.floor(Math.random() * songs.length)];
-                    this.queue.push(randomFallback);
                 }
             }
         } catch (err) {
@@ -290,8 +332,9 @@ class AudioPlayer {
     }
 
     playPrev() {
-        if (this.audio.currentTime > 3) {
-            this.audio.currentTime = 0;
+        const ct = this.ytPlayer ? this.ytPlayer.getCurrentTime() : 0;
+        if (ct > 3) {
+            if (this.ytPlayer) this.ytPlayer.seekTo(0, true);
             return;
         }
         this.currentSongIndex--;
@@ -303,8 +346,8 @@ class AudioPlayer {
 
     handleSongEnd() {
         if (this.repeat === 'one') {
-            this.audio.currentTime = 0;
-            this.audio.play();
+            this.ytPlayer.seekTo(0, true);
+            this.ytPlayer.playVideo();
         } else if (this.repeat === 'all' && this.currentSongIndex === this.queue.length - 1) {
             this.currentSongIndex = 0;
             this.playSong(this.queue[0], 0);
@@ -335,50 +378,55 @@ class AudioPlayer {
     }
 
     updateProgress() {
-        const { currentTime, duration } = this.audio;
-        if (!duration) return;
+        if (!this.ytPlayer || !this.duration) return;
         
-        const progressPercent = (currentTime / duration) * 100;
+        const currentTime = this.ytPlayer.getCurrentTime() || 0;
+        const progressPercent = (currentTime / this.duration) * 100;
         this.progressBarFill.style.width = `${progressPercent}%`;
         this.currentTimeEl.textContent = this.formatTime(currentTime);
     }
 
     seek(e) {
+        if (!this.ytPlayer || !this.duration) return;
         const width = this.progressBarBg.clientWidth;
         const clickX = e.offsetX;
-        const duration = this.audio.duration;
-        this.audio.currentTime = (clickX / width) * duration;
+        const seekTime = (clickX / width) * this.duration;
+        this.ytPlayer.seekTo(seekTime, true);
     }
 
     toggleMute() {
+        if (!this.ytPlayer) return;
         this.isMuted = !this.isMuted;
-        this.audio.muted = this.isMuted;
         
         if (this.isMuted) {
+            this.ytPlayer.mute();
             this.muteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
             this.volumeBarFill.style.width = '0%';
         } else {
+            this.ytPlayer.unMute();
             this.muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
             this.updateVolumeUI();
         }
     }
 
     setVolume(e) {
+        if (!this.ytPlayer) return;
         const width = this.volumeBarBg.clientWidth;
         const clickX = e.offsetX;
         this.volume = clickX / width;
-        this.audio.volume = this.volume;
+        this.ytPlayer.setVolume(this.volume * 100);
         this.isMuted = false;
-        this.audio.muted = false;
+        this.ytPlayer.unMute();
         this.muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
         this.updateVolumeUI();
     }
 
     updateVolumeUI() {
-        this.volumeBarFill.style.width = `${this.audio.volume * 100}%`;
+        this.volumeBarFill.style.width = `${this.volume * 100}%`;
     }
 
     formatTime(seconds) {
+        if (!seconds || isNaN(seconds)) return "0:00";
         const min = Math.floor(seconds / 60);
         const sec = Math.floor(seconds % 60);
         return `${min}:${sec < 10 ? '0' : ''}${sec}`;

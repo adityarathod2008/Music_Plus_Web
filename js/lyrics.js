@@ -11,7 +11,7 @@ class LyricsSync {
     init() {
         if (!this.container) return;
         
-        this.audio.addEventListener('timeupdate', () => this.sync());
+        window.addEventListener('timeupdate', () => this.sync());
     }
 
     loadLyrics(lyricsArray) {
