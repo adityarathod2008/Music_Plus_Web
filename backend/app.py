@@ -242,7 +242,7 @@ def stream(video_id):
         if now - cached['time'] < 7200:
             # Proxy below using cached data
             url = cached['url']
-            yt_headers = cached['headers']
+            base_headers = cached['headers']
         else:
             del url_cache[video_id]
             url = None
@@ -254,6 +254,7 @@ def stream(video_id):
             'format': 'bestaudio[ext=m4a]/bestaudio/best',
             'quiet': True,
             'no_warnings': True,
+            'extractor_args': {'youtube': {'player_client': ['android']}},
         }
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -262,13 +263,15 @@ def stream(video_id):
                 if not url:
                     return jsonify({"error": "No streaming URL found"}), 404
                 
-                yt_headers = info.get('http_headers', {})
+                base_headers = info.get('http_headers', {})
                 # Save to cache
-                url_cache[video_id] = {'url': url, 'headers': yt_headers, 'time': now}
+                url_cache[video_id] = {'url': url, 'headers': base_headers, 'time': now}
         except Exception as e:
             print(f"Stream Extract Error: {e}")
             return jsonify({"error": str(e)}), 500
 
+    yt_headers = dict(base_headers) # IMPORTANT: copy the dict to avoid cache mutation
+    
     # Proxy below using cached data
     try:
         # Get total file size to properly handle chunking
