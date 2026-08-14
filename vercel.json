@@ -48,6 +48,10 @@
       "dest": "/backend/app.py"
     },
     {
+      "src": "/related",
+      "dest": "/backend/app.py"
+    },
+    {
       "src": "/download/(.*)",
       "dest": "/backend/app.py"
     },
