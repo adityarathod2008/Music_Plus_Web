@@ -859,14 +859,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     // UI POPULATION LOGIC
+// UI POPULATION LOGIC
     function populateHome() {
         const quickGrid = document.getElementById('quick-play-grid');
         const madeForYou = document.getElementById('made-for-you');
         const recentlyPlayed = document.getElementById('recently-played');
         
-        quickGrid.innerHTML = '';
-        madeForYou.innerHTML = '';
-        recentlyPlayed.innerHTML = '';
+        if (quickGrid) quickGrid.innerHTML = '';
+        if (madeForYou) madeForYou.innerHTML = '';
+        if (recentlyPlayed) recentlyPlayed.innerHTML = '';
         
         // Quick Play (first 6 songs)
         songs.slice(0, 6).forEach((song, i) => {
@@ -883,17 +884,43 @@ document.addEventListener('DOMContentLoaded', async () => {
                 audioPlayer.playSong(song, 0); 
                 audioPlayer.bufferUpcomingSongs(); 
             });
-            quickGrid.appendChild(card);
+            if (quickGrid) quickGrid.appendChild(card);
         });
         
-        // Made For You
+        // Trending Now (Ranked List in #made-for-you container)
         songs.slice(6, 12).forEach((song, i) => {
-            const card = createMusicCard(song, i + 6, songs);
-            madeForYou.appendChild(card);
+            const row = document.createElement('div');
+            row.className = 'trending-row';
+            
+            // Format duration if available, else omit
+            const duration = song.duration ? `<p>${song.duration}</p>` : '';
+            
+            row.innerHTML = `
+                <div class="rank">${(i + 1).toString().padStart(2, '0')}</div>
+                <img src="${song.cover}" alt="cover" loading="lazy">
+                <div class="trending-row-info">
+                    <h4>${song.title}</h4>
+                    <p>${song.artist}</p>
+                </div>
+                ${duration}
+                <div class="trending-row-actions">
+                    <button class="trend-like-btn" title="Like"><i class="far fa-heart"></i></button>
+                    <button title="More"><i class="fas fa-ellipsis-h"></i></button>
+                </div>
+            `;
+            
+            row.addEventListener('click', (e) => {
+                if(e.target.closest('button')) return; // Ignore button clicks
+                if (!song.src) song.src = `${BACKEND_URL}/stream/${song.id}`;
+                audioPlayer.queue = [song]; 
+                audioPlayer.playSong(song, 0); 
+                audioPlayer.bufferUpcomingSongs(); 
+            });
+            
+            if (madeForYou) madeForYou.appendChild(row);
         });
         
         // Recently Played
-        recentlyPlayed.innerHTML = '';
         if (currentUser && currentUser.playHistory && currentUser.playHistory.length > 0) {
             // Show last 6 played songs (reversed so most recent is first)
             const recent = [...currentUser.playHistory].reverse().slice(0, 6);

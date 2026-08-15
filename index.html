@@ -16,33 +16,52 @@
 
 <body>
     <div id="app">
-        <!-- Sidebar -->
         <nav class="sidebar">
             <div class="logo">
                 <i class="fas fa-compact-disc" style="color: var(--accent-color);"></i>
-                <span>Music+</span>
+                <span>MUSIC+</span>
             </div>
 
-            <ul class="nav-links">
-                <li class="active" data-view="home"><i class="fas fa-home"></i> <span>Home</span></li>
-                <li data-view="search"><i class="fas fa-search"></i> <span>Search</span></li>
-                <li data-view="library"><i class="fas fa-book-open"></i> <span>Your Library</span></li>
-                <li data-view="downloads"><i class="fas fa-download"></i> <span>Downloads</span></li>
-                <li data-view="users-admin" id="admin-nav" style="display: none;"><i class="fas fa-users"></i>
-                    <span>Users DB</span></li>
-            </ul>
-
-            <div class="nav-actions">
-                <button id="create-playlist"><i class="fas fa-plus-square"></i> <span>Create Playlist</span></button>
-                <button id="liked-songs"><i class="fas fa-heart"></i> <span>Liked Songs</span></button>
-                <button id="upload-local" title="Upload local audio files"><i class="fas fa-file-upload"></i>
-                    <span>Upload Music</span></button>
-                <input type="file" id="file-upload" accept="audio/*" multiple style="display: none;">
+            <div class="nav-section">
+                <span class="nav-section-title">HOME</span>
+                <ul class="nav-links">
+                    <li class="active" data-view="home"><i class="fas fa-home"></i> <span>Home</span></li>
+                    <li data-view="search"><i class="fas fa-search"></i> <span>Search</span></li>
+                    <li data-view="home"><i class="fas fa-globe"></i> <span>Explore</span></li>
+                </ul>
             </div>
 
-            <div class="playlists-container">
-                <ul id="user-playlists">
-                    <!-- Dynamic Playlists -->
+            <div class="nav-section">
+                <span class="nav-section-title">LIBRARY</span>
+                <ul class="nav-links">
+                    <li id="liked-songs"><i class="far fa-heart"></i> <span>Liked Songs</span></li>
+                    <li data-view="home"><i class="fas fa-history"></i> <span>Recently Played</span></li>
+                    <li data-view="downloads"><i class="fas fa-arrow-down"></i> <span>Downloads</span></li>
+                    <li data-view="library"><i class="fas fa-music"></i> <span>Albums</span></li>
+                    <li data-view="library"><i class="fas fa-microphone-alt"></i> <span>Artists</span></li>
+                </ul>
+            </div>
+
+            <div class="nav-section playlists-section">
+                <span class="nav-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+                    PLAYLISTS
+                    <i class="fas fa-plus" id="create-playlist" style="cursor: pointer;" title="Create Playlist"></i>
+                </span>
+                <div class="playlists-container">
+                    <ul id="user-playlists">
+                        <!-- Dynamic Playlists -->
+                    </ul>
+                </div>
+            </div>
+
+            <div class="nav-section bottom-nav" style="margin-top: auto; padding-top: 16px;">
+                <ul class="nav-links">
+                    <li data-view="users-admin" id="admin-nav" style="display: none;"><i class="fas fa-users"></i> <span>Users DB</span></li>
+                    <li id="upload-local" title="Upload local audio files"><i class="fas fa-file-upload"></i> <span>Upload Music</span></li>
+                    <input type="file" id="file-upload" accept="audio/*" multiple style="display: none;">
+                    
+                    <li data-view="settings" id="settings-nav-link" style="display: none;"><i class="fas fa-cog"></i> <span>Settings</span></li>
+                    <li data-view="profile" id="profile-nav-link" style="display: none;"><i class="fas fa-user"></i> <span>Profile</span></li>
                 </ul>
             </div>
         </nav>
@@ -51,23 +70,29 @@
         <main class="main-content" id="main-content">
             <div class="dynamic-bg" id="dynamic-bg"></div>
 
-            <header class="topbar">
-                <div class="nav-arrows">
-                    <button class="nav-arrow"><i class="fas fa-chevron-left"></i></button>
-                    <button class="nav-arrow"><i class="fas fa-chevron-right"></i></button>
-                </div>
-
-                <div class="search-bar-container" id="search-container" style="display: none;">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="search-input" placeholder="What do you want to listen to?">
+            <header class="topbar" id="main-topbar">
+                <div class="topbar-left">
+                    <div class="nav-arrows">
+                        <button class="nav-arrow"><i class="fas fa-chevron-left"></i></button>
+                        <button class="nav-arrow"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="search-bar-container" id="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="search-input" placeholder="Search songs, artists, albums...">
+                    </div>
                 </div>
 
                 <div class="user-profile">
+                    <button class="icon-btn tooltip" data-tooltip="Notifications"><i class="far fa-bell"></i></button>
                     <button class="install-btn" id="login-btn">Login / Register</button>
-                    <div class="profile-icon" id="user-avatar" style="display:none;" title="User Profile">
-                        <i class="far fa-user"></i>
+                    <div class="profile-group" id="user-profile-group" style="display:none;">
+                        <div class="profile-icon" id="user-avatar" title="User Profile">
+                            <i class="far fa-user"></i>
+                        </div>
+                        <span class="profile-name" id="profile-username">User</span>
+                        <i class="fas fa-caret-down profile-dropdown"></i>
                     </div>
-                    <button class="install-btn" id="logout-btn" style="display:none; background: #e91429;"><i
+                    <button class="install-btn" id="logout-btn" style="display:none; background: rgba(239, 68, 68, 0.2); color: var(--error);"><i
                             class="fas fa-sign-out-alt"></i></button>
                 </div>
             </header>
@@ -75,9 +100,45 @@
             <div class="scroll-container">
                 <!-- Home View -->
                 <div class="view-container active-view" id="home-view">
-                    <section class="greeting-section">
-                        <h1 id="greeting">Loading Tracks...</h1>
+                    <section class="greeting-section" style="margin-top: 16px; margin-bottom: 24px;">
+                        <h1 id="greeting" style="font-size: 28px; font-weight: 800; margin-bottom: 8px;">Good evening</h1>
+                        <p style="color: var(--text-base); font-size: 14px; margin-bottom: 24px;">What do you want to listen to today?</p>
+                    </section>
+
+                    <!-- Hero Section -->
+                    <section class="hero-section" style="margin-bottom: 40px;">
+                        <div class="hero-card">
+                            <div class="hero-content">
+                                <span class="hero-tag">FEATURED PLAYLIST</span>
+                                <h2>Your Daily Mix</h2>
+                                <p>A personalized collection of songs selected for you.</p>
+                                <div class="hero-actions">
+                                    <button class="hero-play-btn"><i class="fas fa-play"></i> Play Now</button>
+                                    <button class="hero-add-btn"><i class="fas fa-plus"></i> Add to Library</button>
+                                </div>
+                            </div>
+                            <div class="hero-artwork">
+                                <img src="https://placehold.co/400x400/1e1e1e/8b5cf6?text=Daily+Mix" alt="Daily Mix">
+                                <div class="hero-artwork-glow"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="shelf-section">
+                        <div class="shelf-header">
+                            <h2>Quick Access</h2>
+                        </div>
                         <div class="quick-play-grid" id="quick-play-grid">
+                            <!-- Populated by JS -->
+                        </div>
+                    </section>
+                    
+                    <section class="shelf-section">
+                        <div class="shelf-header">
+                            <h2>Recently Played</h2>
+                            <span class="show-all">See All &rarr;</span>
+                        </div>
+                        <div class="cards-container" id="recently-played">
                             <!-- Populated by JS -->
                         </div>
                     </section>
@@ -85,10 +146,9 @@
                     <section class="shelf-section">
                         <div class="shelf-header">
                             <h2>Trending Now</h2>
-                            <span class="show-all">Show all</span>
                         </div>
-                        <div class="cards-container" id="made-for-you">
-                            <!-- Populated by JS -->
+                        <div class="trending-list-container" id="made-for-you">
+                            <!-- Populated by JS (we'll style it as a ranked list) -->
                         </div>
                     </section>
 
@@ -101,22 +161,27 @@
                             <!-- Populated by JS -->
                         </div>
                     </section>
-
-                    <div id="dynamic-shelves-container"></div>
-
+                    
+                    <!-- Mood Section -->
                     <section class="shelf-section">
                         <div class="shelf-header">
-                            <h2>Recently Played</h2>
-                            <span class="show-all">Show all</span>
+                            <h2>What's Your Mood?</h2>
                         </div>
-                        <div class="cards-container" id="recently-played">
-                            <!-- Populated by JS -->
+                        <div class="mood-grid">
+                            <div class="mood-card mood-happy"><i class="fas fa-smile"></i> <span>Happy</span></div>
+                            <div class="mood-card mood-chill"><i class="fas fa-leaf"></i> <span>Chill</span></div>
+                            <div class="mood-card mood-energetic"><i class="fas fa-fire"></i> <span>Energetic</span></div>
+                            <div class="mood-card mood-sad"><i class="fas fa-cloud-rain"></i> <span>Sad</span></div>
+                            <div class="mood-card mood-night"><i class="fas fa-moon"></i> <span>Late Night</span></div>
+                            <div class="mood-card mood-romantic"><i class="fas fa-heart"></i> <span>Romantic</span></div>
                         </div>
                     </section>
+
+                    <div id="dynamic-shelves-container"></div>
                     
                     <section class="shelf-section" id="top-artists-section" style="display: none;">
                         <div class="shelf-header">
-                            <h2>Top Artists</h2>
+                            <h2>Popular Artists</h2>
                         </div>
                         <div class="cards-container artist-cards-container" id="top-artists">
                             <!-- Populated by JS -->
@@ -154,18 +219,31 @@
 
                 <!-- Library View -->
                 <div class="view-container" id="library-view">
-                    <h2 class="section-title">Liked Songs</h2>
-                    <div class="library-header">
-                        <div class="play-btn-large" id="play-liked-btn"><i class="fas fa-play"></i></div>
+                    <div class="library-top">
+                        <h2 class="section-title" style="font-size: 32px; font-weight: 800; margin-bottom: 24px;">Your Library</h2>
+                        
+                        <div class="library-tabs" style="display: flex; gap: 16px; margin-bottom: 24px;">
+                            <button class="lib-tab active" data-tab="songs">Songs</button>
+                            <button class="lib-tab" data-tab="playlists">Playlists</button>
+                            <button class="lib-tab" data-tab="downloads">Downloads</button>
+                        </div>
+                        
+                        <div class="library-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                            <div class="play-btn-large" id="play-liked-btn" style="width: 56px; height: 56px; border-radius: 50%; background: var(--accent-color); color: black; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 8px 16px rgba(139, 92, 246, 0.4);"><i class="fas fa-play"></i></div>
+                            <div class="library-sort" style="color: var(--text-base); font-size: 14px; cursor: pointer;">
+                                <span>Recently Added</span> <i class="fas fa-caret-down"></i>
+                            </div>
+                        </div>
                     </div>
+                    
                     <div class="songs-list-container">
-                        <div class="list-header">
+                        <div class="list-header" style="display: grid; grid-template-columns: 40px 1fr 1fr 60px; padding: 12px 16px; border-bottom: 1px solid var(--border-color); color: var(--text-base); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
                             <span>#</span>
                             <span>Title</span>
-                            <span>Album</span>
-                            <span><i class="far fa-clock"></i></span>
+                            <span>Artist/Album</span>
+                            <span style="text-align: right;"><i class="far fa-clock"></i></span>
                         </div>
-                        <div id="liked-songs-list">
+                        <div id="liked-songs-list" style="margin-top: 8px;">
                             <!-- Populated by JS -->
                         </div>
                     </div>
