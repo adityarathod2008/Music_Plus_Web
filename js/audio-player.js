@@ -204,7 +204,7 @@ class AudioPlayer {
         }
     }
 
-    loadSong(song, startSeconds = 0) {
+    loadSong(song, startSeconds = 0, autoplay = false) {
         if(!song || !this.ytPlayer) return;
         
         if (song.id.startsWith('s')) {
@@ -213,7 +213,12 @@ class AudioPlayer {
             return;
         }
 
-        this.ytPlayer.cueVideoById({videoId: song.id, startSeconds: startSeconds});
+        if (autoplay) {
+            this.ytPlayer.loadVideoById({videoId: song.id, startSeconds: startSeconds});
+        } else {
+            this.ytPlayer.cueVideoById({videoId: song.id, startSeconds: startSeconds});
+        }
+        
         this.trackTitle.textContent = song.title;
         this.trackArtist.textContent = song.artist;
         this.trackCover.src = song.cover;
@@ -262,12 +267,7 @@ class AudioPlayer {
     playSong(song, index) {
         if (song) {
             this.currentSongIndex = index;
-            this.loadSong(song);
-            setTimeout(() => {
-                if (this.ytPlayer && typeof this.ytPlayer.playVideo === 'function') {
-                    this.ytPlayer.playVideo();
-                }
-            }, 100);
+            this.loadSong(song, 0, true);
             this.addToListeningHistory(song);
         }
     }
