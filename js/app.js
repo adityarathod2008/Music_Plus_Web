@@ -94,6 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const uploadBtn = document.getElementById('upload-local');
     const fileInput = document.getElementById('file-upload');
     let currentActiveSong = null;
+    let uiInitialized = false;
     
     let searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
     
@@ -136,9 +137,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             card.addEventListener('click', () => {
                 // Switch to search view and search artist
                 document.querySelectorAll('.nav-links li').forEach(l => l.classList.remove('active'));
-                document.querySelector('.nav-links li[data-view="search"]').classList.add('active');
-                document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view'));
-                document.getElementById('search-view').classList.add('active-view');
+                const searchLink = document.querySelector('.nav-links li[data-view="search"]');
+                if(searchLink) searchLink.classList.add('active');
+                
+                switchView('search'); // Use proper routing function
                 
                 searchInput.value = artist.name;
                 searchInput.dispatchEvent(new Event('input'));
@@ -355,11 +357,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     function initUI() {
-        populateHome();
-        populateGenres();
-        updatePlaylists();
-        renderSearchHistory();
         checkAuthState();
+        
+        // Check for updates for returning users
+        const heroPlayBtn = document.querySelector('.hero-play-btn');
+        const heroAddBtn = document.querySelector('.hero-add-btn');
+        if (heroPlayBtn) {
+            heroPlayBtn.addEventListener('click', () => {
+                if (songs.length > 0) {
+                    const firstSong = songs[0];
+                    if (!firstSong.src) firstSong.src = `${BACKEND_URL}/stream/${firstSong.id}`;
+                    audioPlayer.queue = [...songs];
+                    audioPlayer.playSong(firstSong, 0);
+                    audioPlayer.bufferUpcomingSongs();
+                }
+            });
+        }
+        if (heroAddBtn) {
+            heroAddBtn.addEventListener('click', () => {
+                if (songs.length > 0) {
+                    const firstSong = songs[0];
+                    if (!likedSongs.find(s => s.id === firstSong.id)) {
+                        likedSongs.push(firstSong);
+                        saveLikedSongs();
+                        heroAddBtn.innerHTML = '<i class="fas fa-check"></i> Added';
+                        heroAddBtn.style.background = 'var(--text-base)';
+                        heroAddBtn.style.color = 'black';
+                    }
+                }
+            });
+        }
         
         // Check for updates for returning users
         const app_version = 'v1.1.0';
@@ -653,17 +680,61 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!currentUser) {
             // Forced Login State
             authModal.style.display = 'flex';
-            document.getElementById('main-content').style.filter = 'blur(10px)';
+            document.getElementById('main-content').style.display = 'none';
+            document.querySelector('.sidebar').style.display = 'none';
+            document.querySelector('.player-dock').style.display = 'none';
             loginBtn.style.display = 'block';
             userAvatar.style.display = 'none';
             logoutBtn.style.display = 'none';
             adminNav.style.display = 'none';
+            uiInitialized = false;
         } else {
             // Logged In State
             authModal.style.display = 'none';
-            document.getElementById('main-content').style.filter = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            const sb = document.querySelector('.sidebar');
+            if (sb) sb.style.display = 'flex';
+            const pd = document.querySelector('.player-dock');
+            if (pd) pd.style.display = 'flex';
             loginBtn.style.display = 'none';
             userAvatar.style.display = 'flex';
+            
+            if (!uiInitialized) {
+                populateHome();
+                populateGenres();
+                updatePlaylists();
+                renderSearchHistory();
+                
+                // Hero Actions Wiring
+                const heroPlayBtn = document.querySelector('.hero-play-btn');
+                const heroAddBtn = document.querySelector('.hero-add-btn');
+                if (heroPlayBtn) {
+                    heroPlayBtn.addEventListener('click', () => {
+                        if (songs.length > 0) {
+                            const firstSong = songs[0];
+                            if (!firstSong.src) firstSong.src = `${BACKEND_URL}/stream/${firstSong.id}`;
+                            audioPlayer.queue = [...songs];
+                            audioPlayer.playSong(firstSong, 0);
+                            audioPlayer.bufferUpcomingSongs();
+                        }
+                    });
+                }
+                if (heroAddBtn) {
+                    heroAddBtn.addEventListener('click', () => {
+                        if (songs.length > 0) {
+                            const firstSong = songs[0];
+                            if (!likedSongs.find(s => s.id === firstSong.id)) {
+                                likedSongs.push(firstSong);
+                                saveLikedSongs();
+                                heroAddBtn.innerHTML = '<i class="fas fa-check"></i> Added';
+                                heroAddBtn.style.background = 'var(--text-base)';
+                                heroAddBtn.style.color = 'black';
+                            }
+                        }
+                    });
+                }
+                uiInitialized = true;
+            }
             
             // Set Avatar to First Letter
             userAvatar.innerHTML = currentUser.username.charAt(0).toUpperCase();
@@ -915,6 +986,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 audioPlayer.queue = [song]; 
                 audioPlayer.playSong(song, 0); 
                 audioPlayer.bufferUpcomingSongs(); 
+            });
+            
+            const likeBtn = row.querySelector('.trend-like-btn');
+            likeBtn.addEventListener('click', () => {
+                const idx = likedSongs.findIndex(s => s.id === song.id);
+                if (idx > -1) {
+                    likedSongs.splice(idx, 1);
+                    likeBtn.innerHTML = '<i class="far fa-heart"></i>';
+                } else {
+                    likedSongs.push(song);
+                    likeBtn.innerHTML = '<i class="fas fa-heart"></i>';
+                }
+                saveLikedSongs();
+                updateLikeButtonState();
             });
             
             if (madeForYou) madeForYou.appendChild(row);
