@@ -293,6 +293,30 @@
                         </table>
                     </div>
                 </div>
+                
+                <!-- Artist View -->
+                <div class="view-container" id="artist-view">
+                    <div class="artist-header-wrapper" style="position: relative; margin: -24px -24px 24px -24px; height: 350px; background-size: cover; background-position: center; display: flex; align-items: flex-end; padding: 40px;">
+                        <div style="position: absolute; inset: 0; background: linear-gradient(transparent 0%, var(--bg-color-base) 100%);"></div>
+                        <div style="position: relative; z-index: 1;">
+                            <p style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;"><i class="fas fa-check-circle" style="color: #3d91f4;"></i> Verified Artist</p>
+                            <h1 id="artist-view-name" style="font-size: 72px; font-weight: 900; letter-spacing: -2px; margin-bottom: 16px;">Artist Name</h1>
+                            <p id="artist-view-description" style="max-width: 600px; color: var(--text-subdued); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"></p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 24px; align-items: center; margin-bottom: 32px;">
+                        <button id="artist-play-btn" style="width: 56px; height: 56px; border-radius: 50%; background: var(--accent-color); color: white; border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 16px rgba(0,0,0,0.3); transition: transform 0.2s;">
+                            <i class="fas fa-play" style="margin-left: 4px;"></i>
+                        </button>
+                        <button style="background: transparent; border: 1px solid var(--text-subdued); color: white; padding: 8px 24px; border-radius: 20px; font-weight: 600; cursor: pointer;">Follow</button>
+                    </div>
+                    
+                    <h2 class="section-title">Popular</h2>
+                    <div class="song-list" id="artist-popular-songs">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
             </div>
         </main>
 

@@ -313,6 +313,15 @@ def stream(video_id):
         print(f"Stream Error: {e}")
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/artist/<browse_id>', methods=['GET'])
+def get_artist(browse_id):
+    try:
+        artist_data = ytmusic.get_artist(browse_id)
+        return jsonify(artist_data)
+    except Exception as e:
+        print(f"Artist Fetch Error: {e}")
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     print("Starting Music+ Backend Server on http://127.0.0.1:5000")
     app.run(host='127.0.0.1', port=5000, debug=True)

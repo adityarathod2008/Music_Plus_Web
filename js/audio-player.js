@@ -213,7 +213,7 @@ class AudioPlayer {
             return;
         }
 
-        this.ytPlayer.loadVideoById({videoId: song.id, startSeconds: startSeconds});
+        this.ytPlayer.cueVideoById({videoId: song.id, startSeconds: startSeconds});
         this.trackTitle.textContent = song.title;
         this.trackArtist.textContent = song.artist;
         this.trackCover.src = song.cover;
@@ -263,6 +263,11 @@ class AudioPlayer {
         if (song) {
             this.currentSongIndex = index;
             this.loadSong(song);
+            setTimeout(() => {
+                if (this.ytPlayer && typeof this.ytPlayer.playVideo === 'function') {
+                    this.ytPlayer.playVideo();
+                }
+            }, 100);
             this.addToListeningHistory(song);
         }
     }

@@ -109,16 +109,56 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadTopArtists();
         await loadPopularPlaylists();
         updateGreeting();
+        renderAppWhenReady();
+    }
+    
+    function renderAppWhenReady() {
+        if (currentUser && !uiInitialized && songs.length > 0) {
+            populateHome();
+            populateGenres();
+            updatePlaylists();
+            renderSearchHistory();
+            
+            // Hero Actions Wiring
+            const heroPlayBtn = document.querySelector('.hero-play-btn');
+            const heroAddBtn = document.querySelector('.hero-add-btn');
+            if (heroPlayBtn) {
+                heroPlayBtn.addEventListener('click', () => {
+                    if (songs.length > 0) {
+                        const firstSong = songs[0];
+                        if (!firstSong.src) firstSong.src = `${BACKEND_URL}/stream/${firstSong.id}`;
+                        audioPlayer.queue = [...songs];
+                        audioPlayer.playSong(firstSong, 0);
+                        audioPlayer.bufferUpcomingSongs();
+                    }
+                });
+            }
+            if (heroAddBtn) {
+                heroAddBtn.addEventListener('click', () => {
+                    if (songs.length > 0) {
+                        const firstSong = songs[0];
+                        if (!likedSongs.find(s => s.id === firstSong.id)) {
+                            likedSongs.push(firstSong);
+                            saveLikedSongs();
+                            heroAddBtn.innerHTML = '<i class="fas fa-check"></i> Added';
+                            heroAddBtn.style.background = 'var(--text-base)';
+                            heroAddBtn.style.color = 'black';
+                        }
+                    }
+                });
+            }
+            uiInitialized = true;
+        }
     }
     
     async function loadTopArtists() {
         const artistsList = [
-            { name: "Arijit Singh", image: "https://i.scdn.co/image/ab6761610000e5eb0261696c5df3be99da6ed3f3" },
-            { name: "Taylor Swift", image: "https://i.scdn.co/image/ab6761610000e5eb5a00969a4698c3132a15fbb0" },
-            { name: "Shreya Ghoshal", image: "https://upload.wikimedia.org/wikipedia/commons/2/29/Shreya_Ghoshal_at_the_61st_Filmfare_Awards.jpg" },
-            { name: "The Weeknd", image: "https://i.scdn.co/image/ab6761610000e5eb214f3cf1cbe7139c1e26ffbb" },
-            { name: "Pritam", image: "https://i.scdn.co/image/ab6761610000e5ebcb6926f44f620555ba444fca" },
-            { name: "Ed Sheeran", image: "https://i.scdn.co/image/ab6761610000e5eb12a2ef08d00dd7451a6dbed6" }
+            { name: "Arijit Singh", browseId: "UCDxKh1gFWeYsqePvgVzmPoQ", image: "https://i.scdn.co/image/ab6761610000e5eb0261696c5df3be99da6ed3f3" },
+            { name: "Taylor Swift", browseId: "UCPC0L1d253x-KuMNwa05TpA", image: "https://i.scdn.co/image/ab6761610000e5eb5a00969a4698c3132a15fbb0" },
+            { name: "Shreya Ghoshal", browseId: "UCrC-7fsdTCYeaRBpwA6j-Eg", image: "https://upload.wikimedia.org/wikipedia/commons/2/29/Shreya_Ghoshal_at_the_61st_Filmfare_Awards.jpg" },
+            { name: "The Weeknd", browseId: "UClYV6hHlupm_S_ObS1W-DYw", image: "https://i.scdn.co/image/ab6761610000e5eb214f3cf1cbe7139c1e26ffbb" },
+            { name: "Pritam", browseId: "UCCTN01plFzn4npREHKT2_9Q", image: "https://i.scdn.co/image/ab6761610000e5ebcb6926f44f620555ba444fca" },
+            { name: "Ed Sheeran", browseId: "UClmXPfaYhXOYsNn_QUyheWQ", image: "https://i.scdn.co/image/ab6761610000e5eb12a2ef08d00dd7451a6dbed6" }
         ];
         
         const container = document.getElementById('top-artists');
@@ -135,15 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <p>Artist</p>
             `;
             card.addEventListener('click', () => {
-                // Switch to search view and search artist
-                document.querySelectorAll('.nav-links li').forEach(l => l.classList.remove('active'));
-                const searchLink = document.querySelector('.nav-links li[data-view="search"]');
-                if(searchLink) searchLink.classList.add('active');
-                
-                switchView('search'); // Use proper routing function
-                
-                searchInput.value = artist.name;
-                searchInput.dispatchEvent(new Event('input'));
+                loadArtistProfile(artist.browseId, artist.image);
             });
             container.appendChild(card);
         });
@@ -699,42 +731,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             loginBtn.style.display = 'none';
             userAvatar.style.display = 'flex';
             
-            if (!uiInitialized) {
-                populateHome();
-                populateGenres();
-                updatePlaylists();
-                renderSearchHistory();
-                
-                // Hero Actions Wiring
-                const heroPlayBtn = document.querySelector('.hero-play-btn');
-                const heroAddBtn = document.querySelector('.hero-add-btn');
-                if (heroPlayBtn) {
-                    heroPlayBtn.addEventListener('click', () => {
-                        if (songs.length > 0) {
-                            const firstSong = songs[0];
-                            if (!firstSong.src) firstSong.src = `${BACKEND_URL}/stream/${firstSong.id}`;
-                            audioPlayer.queue = [...songs];
-                            audioPlayer.playSong(firstSong, 0);
-                            audioPlayer.bufferUpcomingSongs();
-                        }
-                    });
-                }
-                if (heroAddBtn) {
-                    heroAddBtn.addEventListener('click', () => {
-                        if (songs.length > 0) {
-                            const firstSong = songs[0];
-                            if (!likedSongs.find(s => s.id === firstSong.id)) {
-                                likedSongs.push(firstSong);
-                                saveLikedSongs();
-                                heroAddBtn.innerHTML = '<i class="fas fa-check"></i> Added';
-                                heroAddBtn.style.background = 'var(--text-base)';
-                                heroAddBtn.style.color = 'black';
-                            }
-                        }
-                    });
-                }
-                uiInitialized = true;
-            }
+            renderAppWhenReady();
             
             // Set Avatar to First Letter
             userAvatar.innerHTML = currentUser.username.charAt(0).toUpperCase();
@@ -1232,6 +1229,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 renderDownloads();
             } else if (viewId === 'users-admin') {
                 document.getElementById('users-admin-view').classList.add('active-view');
+            } else if (viewId === 'artist') {
+                document.getElementById('artist-view').classList.add('active-view');
             }
         }
     }
@@ -1587,6 +1586,121 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     window.renderSearchHistory = renderSearchHistory; // expose
+    
+    let currentArtistSongs = [];
+    async function loadArtistProfile(browseId, fallbackImage) {
+        // Switch to artist view
+        switchView('artist');
+        document.querySelectorAll('.nav-links li').forEach(l => l.classList.remove('active'));
+        
+        const nameEl = document.getElementById('artist-view-name');
+        const descEl = document.getElementById('artist-view-description');
+        const wrapperEl = document.querySelector('.artist-header-wrapper');
+        const songsList = document.getElementById('artist-popular-songs');
+        const playBtn = document.getElementById('artist-play-btn');
+        
+        nameEl.textContent = 'Loading...';
+        descEl.textContent = '';
+        songsList.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-subdued);"><i class="fas fa-spinner fa-spin"></i> Fetching artist details...</div>';
+        wrapperEl.style.backgroundImage = `url('${fallbackImage || ''}')`;
+        
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/artist/${browseId}`);
+            if (!response.ok) throw new Error('Failed to fetch artist');
+            const data = await response.json();
+            
+            nameEl.textContent = data.name || data.artist || 'Artist';
+            descEl.textContent = data.description || '';
+            
+            if (data.thumbnails && data.thumbnails.length > 0) {
+                // Get the largest thumbnail
+                const bestThumb = data.thumbnails.reduce((prev, curr) => (curr.width > prev.width) ? curr : prev);
+                wrapperEl.style.backgroundImage = `url('${bestThumb.url}')`;
+            }
+            
+            songsList.innerHTML = '';
+            
+            // Render songs
+            let tracks = [];
+            if (data.songs && data.songs.results) {
+                tracks = data.songs.results;
+            } else if (data.singles && data.singles.results) {
+                tracks = data.singles.results;
+            }
+            
+            currentArtistSongs = [];
+            
+            if (tracks.length > 0) {
+                tracks.forEach((track, index) => {
+                    if (!track.videoId) return;
+                    
+                    const durationStr = track.duration || "3:00";
+                    let durationSec = 180;
+                    if (durationStr.includes(':')) {
+                        const parts = durationStr.split(':');
+                        if (parts.length === 2) durationSec = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+                    }
+                    
+                    const thumbnails = track.thumbnails || data.thumbnails || [];
+                    const cover = thumbnails.length > 0 ? thumbnails[thumbnails.length-1].url : `https://i.ytimg.com/vi/${track.videoId}/hqdefault.jpg`;
+                    
+                    const songObj = {
+                        id: track.videoId,
+                        title: track.title || 'Unknown',
+                        artist: nameEl.textContent,
+                        cover: cover,
+                        duration: durationSec,
+                        genre: 'Music',
+                        color: '#3d91f4',
+                        lyrics: []
+                    };
+                    
+                    currentArtistSongs.push(songObj);
+                    
+                    const row = document.createElement('div');
+                    row.className = 'song-row';
+                    row.innerHTML = `
+                        <div class="song-col song-index" style="width: 32px; color: var(--text-subdued);">${index + 1}</div>
+                        <div class="song-col song-info">
+                            <img src="${songObj.cover}" alt="cover">
+                            <div class="song-details">
+                                <span class="song-title">${songObj.title}</span>
+                                <span class="song-artist">${songObj.artist}</span>
+                            </div>
+                        </div>
+                        <div class="song-col song-album">${songObj.artist}</div>
+                        <div class="song-col song-duration">${formatSeconds(songObj.duration)}</div>
+                    `;
+                    
+                    row.addEventListener('click', () => {
+                        if (!songObj.src) songObj.src = `${BACKEND_URL}/stream/${songObj.id}`;
+                        audioPlayer.queue = [...currentArtistSongs];
+                        audioPlayer.playSong(songObj, index);
+                        audioPlayer.bufferUpcomingSongs();
+                    });
+                    
+                    songsList.appendChild(row);
+                });
+            } else {
+                songsList.innerHTML = '<div style="text-align: center; color: var(--text-subdued);">No popular tracks found.</div>';
+            }
+            
+            // Setup play all button
+            playBtn.onclick = () => {
+                if (currentArtistSongs.length > 0) {
+                    const firstSong = currentArtistSongs[0];
+                    if (!firstSong.src) firstSong.src = `${BACKEND_URL}/stream/${firstSong.id}`;
+                    audioPlayer.queue = [...currentArtistSongs];
+                    audioPlayer.playSong(firstSong, 0);
+                    audioPlayer.bufferUpcomingSongs();
+                }
+            };
+            
+        } catch (e) {
+            console.error("Error loading artist:", e);
+            songsList.innerHTML = '<div style="text-align: center; color: var(--error);">Failed to load artist details.</div>';
+        }
+    }
     
     async function renderDownloads() {
         const listContainer = document.getElementById('downloads-list');
