@@ -1101,6 +1101,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Format duration if available, else omit
             const duration = song.duration ? `<p>${song.duration}</p>` : '';
+            const isLiked = likedSongs.some(s => s.id === song.id);
+            const heartIcon = isLiked ? 'fas fa-heart' : 'far fa-heart';
+            const heartColor = isLiked ? 'var(--accent-color)' : 'var(--text-base)';
             
             row.innerHTML = `
                 <div class="rank">${(i + 1).toString().padStart(2, '0')}</div>
@@ -1111,7 +1114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
                 ${duration}
                 <div class="trending-row-actions">
-                    <button class="trend-like-btn" title="Like"><i class="far fa-heart"></i></button>
+                    <button class="trend-like-btn" title="Like" style="color: ${heartColor}"><i class="${heartIcon}"></i></button>
                     <button title="More"><i class="fas fa-ellipsis-h"></i></button>
                 </div>
             `;
@@ -1130,9 +1133,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (idx > -1) {
                     likedSongs.splice(idx, 1);
                     likeBtn.innerHTML = '<i class="far fa-heart"></i>';
+                    likeBtn.style.color = 'var(--text-base)';
                 } else {
                     likedSongs.push(song);
                     likeBtn.innerHTML = '<i class="fas fa-heart"></i>';
+                    likeBtn.style.color = 'var(--accent-color)';
                 }
                 window.saveLikedSongs();
                 updateLikeButtonsState();
