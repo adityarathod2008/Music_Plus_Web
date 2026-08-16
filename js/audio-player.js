@@ -43,8 +43,8 @@ class AudioPlayer {
         // Wait for YT API
         window.onYouTubeIframeAPIReady = () => {
             this.ytPlayer = new YT.Player('yt-player', {
-                height: '0',
-                width: '0',
+                height: '1',
+                width: '1',
                 videoId: '',
                 playerVars: {
                     'autoplay': 0,
@@ -97,6 +97,7 @@ class AudioPlayer {
                 if (this.duration > 0 && currentTime >= this.duration - 1) {
                     if (!this.endTriggered) {
                         this.endTriggered = true;
+                        this.ytPlayer.stopVideo(); // Stop current video to prevent ENDED race condition
                         this.handleSongEnd();
                     }
                 }
@@ -123,6 +124,21 @@ class AudioPlayer {
             
         } else if (event.data === YT.PlayerState.BUFFERING) {
             this.playPauseBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            // Fallback: If stuck in buffering for a while, try to force play
+            if (this.bufferingTimeout) clearTimeout(this.bufferingTimeout);
+            this.bufferingTimeout = setTimeout(() => {
+                if (this.ytPlayer && this.ytPlayer.getPlayerState() === YT.PlayerState.BUFFERING) {
+                    this.ytPlayer.playVideo();
+                }
+            }, 2000);
+        } else if (event.data === YT.PlayerState.UNSTARTED) {
+            // Force play if unstarted
+            if (this.unstartedTimeout) clearTimeout(this.unstartedTimeout);
+            this.unstartedTimeout = setTimeout(() => {
+                if (this.ytPlayer && this.ytPlayer.getPlayerState() === YT.PlayerState.UNSTARTED) {
+                    this.ytPlayer.playVideo();
+                }
+            }, 1000);
         }
     }
     
@@ -230,6 +246,11 @@ class AudioPlayer {
 
         if (autoplay) {
             this.ytPlayer.loadVideoById({videoId: song.id, startSeconds: startSeconds});
+            setTimeout(() => {
+                if (this.ytPlayer && this.ytPlayer.getPlayerState() !== YT.PlayerState.PLAYING && this.ytPlayer.getPlayerState() !== YT.PlayerState.BUFFERING) {
+                    this.ytPlayer.playVideo();
+                }
+            }, 500);
         } else {
             this.ytPlayer.cueVideoById({videoId: song.id, startSeconds: startSeconds});
         }
