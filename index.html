@@ -135,7 +135,7 @@
                                 </div>
                             </div>
                             <div class="hero-artwork">
-                                <img src="https://placehold.co/400x400/1e1e1e/8b5cf6?text=Daily+Mix" alt="Daily Mix">
+                                <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23111'/><path d='M200 150v100' stroke='%23333' stroke-width='4'/><circle cx='180' cy='250' r='20' fill='%23333'/></svg>" alt="Daily Mix" loading="lazy">
                                 <div class="hero-artwork-glow"></div>
                             </div>
                         </div>
@@ -357,7 +357,7 @@
 
             <div class="drawer-content scroll-container">
                 <div class="now-playing-full" id="now-playing-drawer">
-                    <img id="drawer-cover" src="https://placehold.co/300x300/121212/1DB954?text=Music+" alt="Album Cover">
+                    <img id="drawer-cover" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23111'/><path d='M200 150v100' stroke='%23333' stroke-width='4'/><circle cx='180' cy='250' r='20' fill='%23333'/></svg>" alt="Album Cover" loading="lazy">
                     <div class="drawer-info">
                         <div>
                             <h2 id="drawer-title">Song Title</h2>
@@ -392,7 +392,7 @@
         <!-- Bottom Audio Player Dock -->
         <div class="player-dock">
             <div class="now-playing-info">
-                <img id="track-cover" src="https://placehold.co/60x60/121212/1DB954?text=Music+" alt="Cover">
+                <img id="track-cover" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23111'/><path d='M200 150v100' stroke='%23333' stroke-width='4'/><circle cx='180' cy='250' r='20' fill='%23333'/></svg>" alt="Cover" loading="lazy">
                 <div class="track-details">
                     <div class="title-scroll-container">
                         <span id="track-title">Select a song</span>
@@ -404,15 +404,15 @@
 
             <div class="player-controls-container">
                 <div class="playback-controls">
-                    <button class="control-btn tooltip" id="shuffle-btn" data-tooltip="Shuffle"><i
+                    <button class="control-btn tooltip" id="shuffle-btn" data-tooltip="Shuffle" aria-label="Shuffle"><i
                             class="fas fa-random"></i></button>
-                    <button class="control-btn tooltip" id="prev-btn" data-tooltip="Previous"><i
+                    <button class="control-btn tooltip" id="prev-btn" data-tooltip="Previous" aria-label="Previous Track"><i
                             class="fas fa-step-backward"></i></button>
-                    <button class="control-btn play-btn tooltip" id="play-pause-btn" data-tooltip="Play"><i
+                    <button class="control-btn play-btn tooltip" id="play-pause-btn" data-tooltip="Play" aria-label="Play or Pause"><i
                             class="fas fa-play"></i></button>
-                    <button class="control-btn tooltip" id="next-btn" data-tooltip="Next"><i
+                    <button class="control-btn tooltip" id="next-btn" data-tooltip="Next" aria-label="Next Track"><i
                             class="fas fa-step-forward"></i></button>
-                    <button class="control-btn tooltip" id="repeat-btn" data-tooltip="Repeat"><i
+                    <button class="control-btn tooltip" id="repeat-btn" data-tooltip="Repeat" aria-label="Repeat"><i
                             class="fas fa-redo"></i></button>
                 </div>
 
@@ -428,24 +428,24 @@
             </div>
 
             <div class="extra-controls">
-                <button class="control-btn tooltip" id="download-btn" data-tooltip="Download"><i
+                <button class="control-btn tooltip" id="download-btn" data-tooltip="Download" aria-label="Download"><i
                         class="fas fa-download"></i></button>
-                <button class="control-btn tooltip" id="lyrics-btn" data-tooltip="Lyrics"><i
+                <button class="control-btn tooltip" id="lyrics-btn" data-tooltip="Lyrics" aria-label="View Lyrics"><i
                         class="fas fa-microphone"></i></button>
-                <button class="control-btn tooltip" id="queue-btn" data-tooltip="Queue"><i
+                <button class="control-btn tooltip" id="queue-btn" data-tooltip="Queue" aria-label="View Queue"><i
                         class="fas fa-list-ul"></i></button>
-                <button class="control-btn tooltip" id="visualizer-btn" data-tooltip="Visualizer"><i
+                <button class="control-btn tooltip" id="visualizer-btn" data-tooltip="Visualizer" aria-label="Toggle Visualizer"><i
                         class="fas fa-wave-square"></i></button>
 
                 <div class="volume-container tooltip" data-tooltip="Volume">
-                    <button class="control-btn" id="mute-btn"><i class="fas fa-volume-up"></i></button>
-                    <div class="volume-bar-bg" id="volume-area">
+                    <button class="control-btn" id="mute-btn" aria-label="Mute or Unmute"><i class="fas fa-volume-up"></i></button>
+                    <div class="volume-bar-bg" id="volume-area" aria-label="Volume Control" tabindex="0">
                         <div class="volume-bar-fill" id="volume-bar">
                             <div class="volume-thumb"></div>
                         </div>
                     </div>
                 </div>
-                <button class="control-btn tooltip" id="fullscreen-btn" data-tooltip="Full Screen"><i
+                <button class="control-btn tooltip" id="fullscreen-btn" data-tooltip="Full Screen" aria-label="Toggle Fullscreen"><i
                         class="fas fa-expand-alt"></i></button>
             </div>
         </div>

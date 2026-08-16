@@ -1370,7 +1370,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         list.innerHTML = '';
         
         if (likedSongs.length === 0) {
-            list.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-subdued);">No liked songs yet.</div>';
+            list.innerHTML = `
+                <div class="empty-state">
+                    <h3>YOUR LIBRARY IS QUIET</h3>
+                    <p>Start discovering music worth keeping.</p>
+                    <button class="cta-btn" onclick="document.querySelector('[data-view=\\'home\\']').click()">EXPLORE MUSIC</button>
+                </div>
+            `;
             return;
         }
         
@@ -1716,10 +1722,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!downloadedSongs || downloadedSongs.length === 0) {
                 playAllContainer.style.display = 'none';
                 listContainer.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: var(--text-subdued);">
-                        <i class="fas fa-download" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
-                        <h3>No downloads yet</h3>
-                        <p style="margin-top: 8px;">Songs you download will appear here for offline listening.</p>
+                    <div class="empty-state">
+                        <h3>NO OFFLINE MUSIC</h3>
+                        <p>Download tracks to listen without connection.</p>
+                        <button class="cta-btn" onclick="document.querySelector('[data-view=\\'home\\']').click()">EXPLORE MUSIC</button>
                     </div>
                 `;
                 return;

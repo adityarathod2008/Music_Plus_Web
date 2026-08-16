@@ -1911,8 +1911,17 @@ h1, h2, h3, h4, h5, h6 {
 
     /* Grid adjustments */
     .quick-play-grid {
-        grid-template-columns: 1fr 1fr;
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
         gap: 12px;
+    }
+    .quick-card {
+        flex: 0 0 85%;
+        scroll-snap-align: start;
     }
     
     .quick-card {
@@ -1930,8 +1939,17 @@ h1, h2, h3, h4, h5, h6 {
     }
     
     .cards-container {
-        grid-template-columns: repeat(2, 1fr);
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 16px;
+        -webkit-overflow-scrolling: touch;
         gap: 16px;
+    }
+    .music-card {
+        flex: 0 0 160px;
+        scroll-snap-align: start;
     }
     
     .music-card {
@@ -2213,4 +2231,21 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes skeleton-loading {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
+}
+
+/* =========================================
+   ACCESSIBILITY
+   ========================================= */
+*:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
