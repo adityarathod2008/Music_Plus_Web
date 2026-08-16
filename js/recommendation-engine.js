@@ -150,15 +150,15 @@ window.initializeRecommendations = function() {
             renderSongs.forEach((song, i) => {
                 const card = document.createElement('div');
                 card.className = 'quick-card';
-                card.innerHTML = \`
-                    <img src="\${song.cover}" alt="cover" loading="lazy" onerror="window.handleImageError(this, '\${song.title}', 'song')">
-                    <h4 class="card-title">\${song.title}</h4>
+                card.innerHTML = `
+                    <img src="${song.cover}" alt="cover" loading="lazy" onerror="window.handleImageError(this, '${song.title}', 'song')">
+                    <h4 class="card-title">${song.title}</h4>
                     <button class="quick-play-btn"><i class="fas fa-play"></i></button>
-                \`;
+                `;
                 
                 // Clicking quick card plays it
                 card.addEventListener('click', () => { 
-                    if (!song.src) song.src = \`\${BACKEND_URL}/stream/\${song.id}\`;
+                    if (!song.src) song.src = `${BACKEND_URL}/stream/${song.id}`;
                     if (window.audioPlayer) {
                         window.audioPlayer.queue = [song]; 
                         window.audioPlayer.playSong(song, 0); 
@@ -177,21 +177,21 @@ window.initializeRecommendations = function() {
             mfySongs.forEach((song, i) => {
                 const row = document.createElement('div');
                 row.className = 'trending-row';
-                const duration = song.duration ? \`<p>\${song.duration}</p>\` : '';
+                const duration = song.duration ? `<p>${song.duration}</p>` : '';
                 
-                row.innerHTML = \`
-                    <div class="rank">\${(i + 1).toString().padStart(2, '0')}</div>
-                    <img src="\${song.cover}" alt="cover" loading="lazy" onerror="window.handleImageError(this, '\${song.title}', 'song')">
+                row.innerHTML = `
+                    <div class="rank">${(i + 1).toString().padStart(2, '0')}</div>
+                    <img src="${song.cover}" alt="cover" loading="lazy" onerror="window.handleImageError(this, '${song.title}', 'song')">
                     <div class="trending-row-info" style="cursor:pointer">
-                        <h4 class="card-title">\${song.title}</h4>
-                        <p>\${song.artist}</p>
+                        <h4 class="card-title">${song.title}</h4>
+                        <p>${song.artist}</p>
                     </div>
-                    \${duration}
+                    ${duration}
                     <div class="trending-row-actions">
                         <button class="trend-like-btn" title="Like"><i class="far fa-heart"></i></button>
                         <button title="More"><i class="fas fa-ellipsis-h"></i></button>
                     </div>
-                \`;
+                `;
                 
                 row.querySelector('.trending-row-info').addEventListener('click', () => {
                      if (window.renderTrackDetail) {
@@ -201,7 +201,7 @@ window.initializeRecommendations = function() {
                 
                 row.addEventListener('click', (e) => {
                     if(e.target.closest('button') || e.target.closest('.trending-row-info')) return;
-                    if (!song.src) song.src = \`\${BACKEND_URL}/stream/\${song.id}\`;
+                    if (!song.src) song.src = `${BACKEND_URL}/stream/${song.id}`;
                     if (window.audioPlayer) {
                         window.audioPlayer.queue = [song]; 
                         window.audioPlayer.playSong(song, 0); 

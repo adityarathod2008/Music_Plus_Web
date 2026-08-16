@@ -1245,7 +1245,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         
         detailContainer.querySelector('#detail-play-btn').addEventListener('click', () => {
-            if (!song.src) song.src = \`\${BACKEND_URL}/stream/\${song.id}\`;
+            if (!song.src) song.src = `${BACKEND_URL}/stream/${song.id}`;
             audioPlayer.queue = contextQueue ? [...contextQueue] : [song];
             audioPlayer.playSong(song, 0);
         });
