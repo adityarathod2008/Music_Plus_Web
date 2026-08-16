@@ -38,7 +38,7 @@ body {
 #app {
     display: grid;
     grid-template-columns: var(--sidebar-width) 1fr 0px;
-    grid-template-rows: 1fr;
+    grid-template-rows: minmax(0, 1fr);
     height: 100vh;
     transition: grid-template-columns 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
@@ -218,6 +218,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 0;
+    height: calc(100vh - 16px);
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
 }
 
