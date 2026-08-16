@@ -2354,3 +2354,8 @@ h1, h2, h3, h4, h5, h6 {
     height: 140px;
     margin-bottom: 12px;
 }
+
+
+/* Added for like button state */
+.like-btn.liked i, .drawer-like.liked i { color: var(--accent-color, #1DB954); text-shadow: 0 0 10px rgba(29, 185, 84, 0.5); }
+

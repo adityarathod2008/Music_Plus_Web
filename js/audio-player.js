@@ -76,12 +76,12 @@ class AudioPlayer {
     }
     
     onPlayerStateChange(event) {
-        // YT.PlayerState.PLAYING = 1, PAUSED = 2, ENDED = 0, BUFFERING = 3
         if (event.data === YT.PlayerState.PLAYING) {
             this.isPlaying = true;
             this.playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
             this.duration = this.ytPlayer.getDuration();
             this.totalTimeEl.textContent = this.formatTime(this.duration);
+            this.endTriggered = false; // Reset the flag when playback starts
             
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.playbackState = 'playing';
@@ -92,6 +92,15 @@ class AudioPlayer {
                 this.updateProgress();
                 window.dispatchEvent(new Event('timeupdate'));
                 const currentTime = this.ytPlayer.getCurrentTime();
+                
+                // Manually trigger end if YT player fails to fire ENDED event
+                if (this.duration > 0 && currentTime >= this.duration - 1) {
+                    if (!this.endTriggered) {
+                        this.endTriggered = true;
+                        this.handleSongEnd();
+                    }
+                }
+                
                 if (Math.floor(currentTime) % 5 === 0) {
                     this.saveSession();
                 }
@@ -107,7 +116,10 @@ class AudioPlayer {
             }
             
         } else if (event.data === YT.PlayerState.ENDED) {
-            this.handleSongEnd();
+            if (!this.endTriggered) {
+                this.endTriggered = true;
+                this.handleSongEnd();
+            }
             
         } else if (event.data === YT.PlayerState.BUFFERING) {
             this.playPauseBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
