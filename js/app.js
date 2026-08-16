@@ -584,6 +584,44 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (viewId === 'users-admin') {
                     renderUsersTable();
                 }
+                
+                // Handle Artists sidebar button
+                if (target.id === 'sidebar-artists-btn') {
+                    document.querySelectorAll('.lib-tab').forEach(t => t.classList.remove('active'));
+                    const artistsTab = document.querySelector('.lib-tab[data-tab="artists"]');
+                    if (artistsTab) artistsTab.classList.add('active');
+                    
+                    const songsContainer = document.querySelector('#library-view .songs-list-container');
+                    const artistsContainer = document.getElementById('artists-tab-content');
+                    if (songsContainer) songsContainer.style.display = 'none';
+                    if (artistsContainer) artistsContainer.style.display = 'block';
+                }
+            });
+        });
+        
+        // Library Tabs Logic
+        const libTabs = document.querySelectorAll('.lib-tab');
+        libTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                libTabs.forEach(t => t.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                
+                const tabId = e.currentTarget.getAttribute('data-tab');
+                const songsContainer = document.querySelector('#library-view .songs-list-container');
+                const artistsContainer = document.getElementById('artists-tab-content');
+                
+                if (tabId === 'songs') {
+                    if (songsContainer) songsContainer.style.display = 'block';
+                    if (artistsContainer) artistsContainer.style.display = 'none';
+                } else if (tabId === 'artists') {
+                    if (songsContainer) songsContainer.style.display = 'none';
+                    if (artistsContainer) artistsContainer.style.display = 'block';
+                } else if (tabId === 'downloads') {
+                    switchView('downloads');
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    const dlLink = document.querySelector('.nav-links li[data-view="downloads"]');
+                    if (dlLink) dlLink.classList.add('active');
+                }
             });
         });
         

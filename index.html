@@ -38,7 +38,7 @@
                     <li data-view="home"><i class="fas fa-history"></i> <span>Recently Played</span></li>
                     <li data-view="downloads"><i class="fas fa-arrow-down"></i> <span>Downloads</span></li>
                     <li data-view="library"><i class="fas fa-music"></i> <span>Albums</span></li>
-                    <li data-view="library"><i class="fas fa-microphone-alt"></i> <span>Artists</span></li>
+                    <li data-view="library" id="sidebar-artists-btn"><i class="fas fa-microphone-alt"></i> <span>Artists</span></li>
                 </ul>
             </div>
 
@@ -226,6 +226,7 @@
                             <button class="lib-tab active" data-tab="songs">Songs</button>
                             <button class="lib-tab" data-tab="playlists">Playlists</button>
                             <button class="lib-tab" data-tab="downloads">Downloads</button>
+                            <button class="lib-tab" data-tab="artists">Artists</button>
                         </div>
                         
                         <div class="library-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
@@ -245,6 +246,16 @@
                         </div>
                         <div id="liked-songs-list" style="margin-top: 8px;">
                             <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Artists Tab Content -->
+                    <div class="artists-list-container" id="artists-tab-content" style="display: none;">
+                        <div class="cards-container artist-cards-container" id="library-artists-list">
+                            <!-- User added artist data will go here -->
+                            <div style="text-align: center; padding: 40px; color: var(--text-subdued); grid-column: 1 / -1;">
+                                You haven't followed any artists yet.
+                            </div>
                         </div>
                     </div>
                 </div>
