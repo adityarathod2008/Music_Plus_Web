@@ -761,7 +761,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             // Logged In State
             authModal.style.display = 'none';
-            document.getElementById('main-content').style.display = 'block';
+            document.getElementById('main-content').style.display = 'flex';
             const sb = document.querySelector('.sidebar');
             if (sb) sb.style.display = 'flex';
             const pd = document.querySelector('.player-dock');
