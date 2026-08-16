@@ -874,46 +874,56 @@ h1, h2, h3, h4, h5, h6 {
 
 .field-node {
     position: absolute;
-    border-radius: 50%;
+    border-radius: 50% !important;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     background: var(--surface-hover);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border) !important;
     color: var(--text-primary);
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     z-index: 10;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+    padding: 0 !important;
+    overflow: visible !important;
 }
 
 .field-node:hover {
-    transform: scale(1.15);
-    background: rgba(0, 255, 204, 0.1);
-    border-color: var(--accent);
-    color: var(--accent);
-    box-shadow: 0 0 20px rgba(0, 255, 204, 0.4);
+    transform: scale(1.15) !important;
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.4) !important;
 }
 
 .field-node i {
-    font-size: 1.5rem;
-    margin-bottom: 5px;
+    font-size: 1.5rem !important;
+    margin-bottom: 0 !important;
+    align-self: center !important;
+    opacity: 1 !important;
 }
 .field-node span {
-    font-size: 0.75rem;
+    position: absolute;
+    bottom: -25px;
+    font-size: 0.75rem !important;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
+    white-space: nowrap;
+    text-align: center;
+    color: var(--text-primary);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
 }
 
-.node-center { width: 110px; height: 110px; z-index: 20; background: rgba(0, 255, 204, 0.15); border-color: var(--accent); color: var(--accent); top: calc(50% - 55px); left: calc(50% - 55px); }
-.node-1 { width: 80px; height: 80px; top: 15%; left: 30%; }
-.node-2 { width: 90px; height: 90px; top: 20%; right: 25%; }
-.node-3 { width: 75px; height: 75px; bottom: 20%; left: 20%; }
-.node-4 { width: 85px; height: 85px; bottom: 15%; right: 30%; }
-.node-5 { width: 70px; height: 70px; top: 40%; left: 10%; }
-.node-6 { width: 80px; height: 80px; top: 45%; right: 10%; }
+.node-center { width: 90px !important; height: 90px !important; z-index: 20; background: rgba(0, 255, 204, 0.15) !important; border-color: var(--accent) !important; color: var(--accent) !important; top: calc(50% - 45px); left: calc(50% - 45px); }
+.node-1 { width: 70px !important; height: 70px !important; top: 20%; left: 30%; }
+.node-2 { width: 75px !important; height: 75px !important; top: 25%; right: 25%; }
+.node-3 { width: 65px !important; height: 65px !important; bottom: 25%; left: 20%; }
+.node-4 { width: 70px !important; height: 70px !important; bottom: 20%; right: 30%; }
+.node-5 { width: 60px !important; height: 60px !important; top: 45%; left: 15%; }
+.node-6 { width: 65px !important; height: 65px !important; top: 50%; right: 15%; }
+
 
 @media (max-width: 768px) {
     .music-field {

@@ -181,6 +181,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Hide other views and show this one
         views.forEach(v => v.classList.remove('active'));
         moodContainer.classList.add('active');
+        
+        // Auto-play the mood tracks instantly when selected
+        if (window.audioPlayer && moodTracks.length > 0) {
+            audioPlayer.queue = [...moodTracks];
+            audioPlayer.playSong(moodTracks[0], 0);
+        }
     }
     await initData();
     initUI();
