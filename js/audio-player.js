@@ -28,7 +28,10 @@ class AudioPlayer {
         this.trackCover = document.getElementById('track-cover');
         this.trackTitle = document.getElementById('track-title');
         this.trackArtist = document.getElementById('track-artist');
-        this.dynamicBg = document.getElementById('dynamic-bg');
+        this.trackCover = document.getElementById('track-cover');
+        this.audioConsoleMeta = document.getElementById('audio-console-metadata');
+        this.trackVibe = document.getElementById('track-vibe');
+        this.trackEnergy = document.getElementById('track-energy');
         
         this.drawerCover = document.getElementById('drawer-cover');
         this.drawerTitle = document.getElementById('drawer-title');
@@ -227,6 +230,18 @@ class AudioPlayer {
         this.drawerArtist.textContent = song.artist;
         this.drawerCover.src = song.cover;
         
+        if (this.audioConsoleMeta && this.trackVibe && this.trackEnergy) {
+            this.audioConsoleMeta.style.display = 'block';
+            setTimeout(() => this.audioConsoleMeta.style.opacity = '1', 50);
+            
+            // Derive some mock aesthetic data if not present in track metadata
+            const vibe = song.genre || song.mood || 'CHILL';
+            const energy = song.bpm ? Math.min(100, Math.round((song.bpm / 160) * 100)) + '%' : (Math.floor(Math.random() * 50) + 40) + '%';
+            
+            this.trackVibe.textContent = vibe.toUpperCase();
+            this.trackEnergy.textContent = energy;
+        }
+        
         const bgColor = song.color || '#1DB954';
         this.dynamicBg.style.background = `linear-gradient(to bottom, ${bgColor}, var(--bg-color-base))`;
         
@@ -315,6 +330,9 @@ class AudioPlayer {
             if (history.length > 50) history.pop();
             localStorage.setItem('listeningHistory', JSON.stringify(history));
             
+            if (window.musicRecommendationEngine) {
+                window.musicRecommendationEngine.recordEvent('TRACK_COMPLETED', song);
+            }
             window.dispatchEvent(new CustomEvent('listeningHistoryUpdated'));
         } catch(e) {}
     }

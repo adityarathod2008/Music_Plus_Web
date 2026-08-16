@@ -71,6 +71,24 @@ class AudioVisualizer {
             }
         }
         
+        // Audio-Reactive Environment glow
+        if (isPlaying) {
+            let avg = 0;
+            for(let i=0; i<this.bufferLength; i++) { avg += this.dataArray[i]; }
+            avg = avg / this.bufferLength;
+            // Depending on mode, the max expected value changes. 
+            // In bars mode it is up to 255. In wave it centers at 128.
+            let normalized = 0;
+            if (this.mode === 'wave') {
+                normalized = Math.min(1, Math.abs(avg - 128) / 64);
+            } else {
+                normalized = Math.min(1, avg / 128);
+            }
+            document.documentElement.style.setProperty('--glow-intensity', (0.1 + normalized * 0.4).toFixed(2));
+        } else {
+            document.documentElement.style.setProperty('--glow-intensity', '0.1');
+        }
+        
         // Cyber-industrial dark background with trailing effect
         this.ctx.globalCompositeOperation = 'source-over';
         this.ctx.fillStyle = 'rgba(5, 5, 5, 0.25)';

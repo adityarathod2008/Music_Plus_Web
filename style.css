@@ -48,6 +48,9 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+    /* Add subtle reactive background glow */
+    background-image: radial-gradient(circle at 50% 100%, rgba(0, 255, 204, var(--glow-intensity)) 0%, rgba(0, 0, 0, 0) 50%);
+    transition: background-image 0.1s ease-out;
 }
 
 #app {
@@ -852,9 +855,79 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Mood Grid */
 .mood-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 16px;
+    display: none; /* Replaced by Music Field */
+}
+
+/* MUSIC FIELD VISUALIZATION */
+.music-field {
+    position: relative;
+    width: 100%;
+    height: 350px;
+    background: radial-gradient(circle at center, rgba(0, 255, 204, 0.05) 0%, transparent 70%);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.field-node {
+    position: absolute;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 10;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.field-node:hover {
+    transform: scale(1.15);
+    background: rgba(0, 255, 204, 0.1);
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.4);
+}
+
+.field-node i {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+.field-node span {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.node-center { width: 110px; height: 110px; z-index: 20; background: rgba(0, 255, 204, 0.15); border-color: var(--accent); color: var(--accent); top: calc(50% - 55px); left: calc(50% - 55px); }
+.node-1 { width: 80px; height: 80px; top: 15%; left: 30%; }
+.node-2 { width: 90px; height: 90px; top: 20%; right: 25%; }
+.node-3 { width: 75px; height: 75px; bottom: 20%; left: 20%; }
+.node-4 { width: 85px; height: 85px; bottom: 15%; right: 30%; }
+.node-5 { width: 70px; height: 70px; top: 40%; left: 10%; }
+.node-6 { width: 80px; height: 80px; top: 45%; right: 10%; }
+
+@media (max-width: 768px) {
+    .music-field {
+        height: 250px;
+    }
+    .field-node span { display: none; }
+    .field-node i { margin-bottom: 0; font-size: 1.2rem; }
+    .node-center { width: 80px; height: 80px; top: calc(50% - 40px); left: calc(50% - 40px); }
+    .node-1 { width: 50px; height: 50px; top: 10%; left: 20%; }
+    .node-2 { width: 60px; height: 60px; top: 15%; right: 15%; }
+    .node-3 { width: 50px; height: 50px; bottom: 15%; left: 15%; }
+    .node-4 { width: 55px; height: 55px; bottom: 10%; right: 20%; }
+    .node-5 { width: 45px; height: 45px; top: 40%; left: 5%; }
+    .node-6 { width: 50px; height: 50px; top: 45%; right: 5%; }
 }
 
 .mood-card {
@@ -2248,4 +2321,26 @@ h1, h2, h3, h4, h5, h6 {
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+}
+
+/* Image Fallbacks */
+.fallback-avatar {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--surface-hover), var(--surface));
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+.fallback-artist {
+    border-radius: 50%; /* Make artists circular */
+}
+.artist-card .fallback-avatar {
+    width: 140px;
+    height: 140px;
+    margin-bottom: 12px;
 }

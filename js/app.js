@@ -98,6 +98,90 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     let searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
     
+    // --- UTILITIES ---
+    window.getInitials = function(name) {
+        if (!name) return '?';
+        return name.split(' ').filter(n => n.length > 0).map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    };
+
+    window.handleImageError = function(imgElement, fallbackName, type = 'artist') {
+        imgElement.style.display = 'none';
+        
+        // Prevent infinite loops if already replaced
+        if (imgElement.nextElementSibling && imgElement.nextElementSibling.classList.contains('fallback-avatar')) {
+            return;
+        }
+
+        const fallback = document.createElement('div');
+        fallback.className = `fallback-avatar fallback-${type}`;
+        fallback.innerText = window.getInitials(fallbackName);
+        imgElement.parentElement.appendChild(fallback);
+    };
+
+    function setupMoodButtons() {
+        const moodCards = document.querySelectorAll('.mood-card');
+        moodCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const moodName = card.querySelector('span').innerText.trim();
+                renderMoodView(moodName);
+            });
+        });
+    }
+    
+    function renderMoodView(moodName) {
+        // Find or create a mood section container in the DOM
+        let moodContainer = document.getElementById('mood-view-container');
+        if (!moodContainer) {
+            moodContainer = document.createElement('div');
+            moodContainer.id = 'mood-view-container';
+            moodContainer.className = 'view-container';
+            document.getElementById('main-content').appendChild(moodContainer);
+        }
+        
+        // Generate pseudo-filtered tracks (simulating a recommendation backend)
+        // Since we are working with static 'songs' array, we shuffle and pick a subset.
+        const shuffled = [...songs].sort(() => 0.5 - Math.random());
+        const moodTracks = shuffled.slice(0, 8); // Display 8 tracks for the mood
+        
+        moodContainer.innerHTML = `
+            <div class="shelf-header" style="margin-top: 40px; border-bottom: 1px solid var(--border); padding-bottom: 20px;">
+                <h1 style="font-size: 3rem; text-transform: uppercase; color: var(--accent);">${moodName} MODE</h1>
+                <p style="color: var(--text-subdued); font-size: 1.2rem;">Songs for your current vibe.</p>
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button class="cta-btn" id="play-mood-btn" style="background: var(--accent); color: black; padding: 12px 24px; border-radius: 24px; border: none; font-weight: bold; cursor: pointer;">
+                        PLAY MOOD
+                    </button>
+                    <button class="cta-btn" id="shuffle-mood-btn" style="background: transparent; color: var(--text-primary); padding: 12px 24px; border-radius: 24px; border: 1px solid var(--border); font-weight: bold; cursor: pointer;">
+                        SHUFFLE
+                    </button>
+                </div>
+            </div>
+            <div class="shelf-section" style="margin-top: 40px;">
+                <div class="cards-container" id="mood-tracks-grid"></div>
+            </div>
+        `;
+        
+        const grid = moodContainer.querySelector('#mood-tracks-grid');
+        moodTracks.forEach((song, i) => {
+            const card = createMusicCard(song, i, moodTracks);
+            grid.appendChild(card);
+        });
+        
+        moodContainer.querySelector('#play-mood-btn').addEventListener('click', () => {
+            audioPlayer.queue = [...moodTracks];
+            audioPlayer.playSong(moodTracks[0], 0);
+        });
+        
+        moodContainer.querySelector('#shuffle-mood-btn').addEventListener('click', () => {
+            const shuffledMood = [...moodTracks].sort(() => 0.5 - Math.random());
+            audioPlayer.queue = shuffledMood;
+            audioPlayer.playSong(shuffledMood[0], 0);
+        });
+        
+        // Hide other views and show this one
+        views.forEach(v => v.classList.remove('active'));
+        moodContainer.classList.add('active');
+    }
     await initData();
     initUI();
     
@@ -116,6 +200,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (currentUser && !uiInitialized && songs.length > 0) {
             populateHome();
             populateGenres();
+            setupMoodButtons();
+            
+            // Set up Quick Access & Recommendations
+            if (window.initializeRecommendations) {
+                window.initializeRecommendations();
+            }
             updatePlaylists();
             renderSearchHistory();
             
@@ -170,7 +260,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const card = document.createElement('div');
             card.className = 'artist-card';
             card.innerHTML = `
-                <img src="${artist.image}" alt="${artist.name}" loading="lazy">
+                <img src="${artist.image}" alt="${artist.name}" loading="lazy" onerror="window.handleImageError(this, '${artist.name}')">
                 <h4>${artist.name}</h4>
                 <p>Artist</p>
             `;
@@ -1061,20 +1151,123 @@ document.addEventListener('DOMContentLoaded', async () => {
         const card = document.createElement('div');
         card.className = 'music-card';
         card.innerHTML = `
-            <div class="card-img-container">
-                <img src="${song.cover}" alt="cover" loading="lazy">
+            <div class="card-img-container" style="cursor: pointer;">
+                <img src="${song.cover}" alt="cover" loading="lazy" onerror="window.handleImageError(this, '${song.title}', 'song')">
                 <button class="card-play-btn"><i class="fas fa-play"></i></button>
             </div>
-            <h4>${song.title}</h4>
-            <p>${song.artist}</p>
+            <h4 class="card-title" style="cursor: pointer; transition: color 0.2s;">${song.title}</h4>
+            <p class="card-artist" style="cursor: pointer; transition: color 0.2s;">${song.artist}</p>
         `;
-        card.addEventListener('click', () => { 
+        
+        // Artwork click -> Play and expand player
+        const imgContainer = card.querySelector('.card-img-container');
+        imgContainer.addEventListener('click', (e) => {
             if (!song.src) song.src = `${BACKEND_URL}/stream/${song.id}`;
-            audioPlayer.queue = [song]; 
-            audioPlayer.playSong(song, 0); 
-            audioPlayer.bufferUpcomingSongs(); 
+            audioPlayer.queue = queueArray ? [...queueArray] : [song];
+            audioPlayer.playSong(song, index || 0);
+            audioPlayer.bufferUpcomingSongs();
+            
+            // Open expanded player
+            const playerDock = document.getElementById('player-dock');
+            if (playerDock && !playerDock.classList.contains('expanded')) {
+                document.getElementById('fullscreen-btn').click();
+            }
         });
+        
+        // Title click -> Track detail view
+        const titleEl = card.querySelector('.card-title');
+        titleEl.addEventListener('mouseenter', () => titleEl.style.color = 'var(--accent)');
+        titleEl.addEventListener('mouseleave', () => titleEl.style.color = 'var(--text-primary)');
+        titleEl.addEventListener('click', () => {
+            renderTrackDetail(song, queueArray);
+        });
+
+        // Artist click -> Artist detail view
+        const artistEl = card.querySelector('.card-artist');
+        artistEl.addEventListener('mouseenter', () => artistEl.style.color = 'var(--accent)');
+        artistEl.addEventListener('mouseleave', () => artistEl.style.color = 'var(--text-secondary)');
+        artistEl.addEventListener('click', () => {
+            const browseId = song.artistBrowseId || "UCDxKh1gFWeYsqePvgVzmPoQ"; // Mock or actual ID
+            loadArtistProfile(browseId, song.cover);
+        });
+
         return card;
+    }
+    
+    function renderTrackDetail(song, contextQueue) {
+        let detailContainer = document.getElementById('track-detail-container');
+        if (!detailContainer) {
+            detailContainer = document.createElement('div');
+            detailContainer.id = 'track-detail-container';
+            detailContainer.className = 'view-container';
+            document.getElementById('main-content').appendChild(detailContainer);
+        }
+        
+        const isLiked = likedSongs.some(s => s.id === song.id);
+        
+        detailContainer.innerHTML = `
+            <div style="display: flex; gap: 40px; margin-top: 40px; padding-bottom: 40px; border-bottom: 1px solid var(--border); flex-wrap: wrap;">
+                <div style="flex: 0 0 250px;">
+                    <img src="${song.cover}" style="width: 100%; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" onerror="window.handleImageError(this, '${song.title}', 'song')">
+                </div>
+                <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; justify-content: flex-end;">
+                    <p style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; color: var(--text-subdued);">Song</p>
+                    <h1 style="font-size: 3.5rem; font-weight: 900; margin: 10px 0;">${song.title}</h1>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                        <img src="${song.cover}" style="width: 24px; height: 24px; border-radius: 50%;">
+                        <span style="font-weight: 700; cursor: pointer;" onclick="loadArtistProfile('UCDxKh1gFWeYsqePvgVzmPoQ', '${song.cover}')">${song.artist}</span>
+                        <span style="color: var(--text-subdued);">• ${song.album || 'Single'} • ${song.duration || '3:00'}</span>
+                    </div>
+                </div>
+            </div>
+            <div style="padding: 20px 0; display: flex; gap: 15px; align-items: center;">
+                <button class="cta-btn" id="detail-play-btn" style="width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: black; border: none; font-size: 24px; cursor: pointer;">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button id="detail-like-btn" style="background: transparent; border: none; color: ${isLiked ? 'var(--accent)' : 'var(--text-subdued)'}; font-size: 28px; cursor: pointer;">
+                    <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
+                </button>
+                <button style="background: transparent; border: 1px solid var(--border); color: var(--text-primary); padding: 8px 16px; border-radius: 20px; font-weight: 600; cursor: pointer;">
+                    ADD TO QUEUE
+                </button>
+            </div>
+            <div style="margin-top: 30px;">
+                <h3 style="margin-bottom: 20px;">Related Tracks</h3>
+                <div class="cards-container" id="detail-related-grid"></div>
+            </div>
+        `;
+        
+        const grid = detailContainer.querySelector('#detail-related-grid');
+        const related = [...songs].sort(() => 0.5 - Math.random()).slice(0, 6);
+        related.forEach((s, i) => {
+            const card = createMusicCard(s, i, related);
+            grid.appendChild(card);
+        });
+        
+        detailContainer.querySelector('#detail-play-btn').addEventListener('click', () => {
+            if (!song.src) song.src = \`\${BACKEND_URL}/stream/\${song.id}\`;
+            audioPlayer.queue = contextQueue ? [...contextQueue] : [song];
+            audioPlayer.playSong(song, 0);
+        });
+        
+        detailContainer.querySelector('#detail-like-btn').addEventListener('click', (e) => {
+            const btn = e.currentTarget;
+            const icon = btn.querySelector('i');
+            const idx = likedSongs.findIndex(s => s.id === song.id);
+            if (idx > -1) {
+                likedSongs.splice(idx, 1);
+                btn.style.color = 'var(--text-subdued)';
+                icon.className = 'far fa-heart';
+            } else {
+                likedSongs.push(song);
+                btn.style.color = 'var(--accent)';
+                icon.className = 'fas fa-heart';
+            }
+            if (window.saveLikedSongs) window.saveLikedSongs();
+        });
+        
+        views.forEach(v => v.classList.remove('active'));
+        detailContainer.classList.add('active');
     }
     
     function populateGenres() {
