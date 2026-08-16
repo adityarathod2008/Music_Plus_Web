@@ -1120,11 +1120,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             
             const likeBtn = row.querySelector('.trend-like-btn');
-            likeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (window.toggleSongLike) {
-                    window.toggleSongLike(song, likeBtn);
+            likeBtn.addEventListener('click', () => {
+                const idx = likedSongs.findIndex(s => s.id === song.id);
+                if (idx > -1) {
+                    likedSongs.splice(idx, 1);
+                    likeBtn.innerHTML = '<i class="far fa-heart"></i>';
+                } else {
+                    likedSongs.push(song);
+                    likeBtn.innerHTML = '<i class="fas fa-heart"></i>';
                 }
+                saveLikedSongs();
+                updateLikeButtonState();
             });
             
             if (madeForYou) madeForYou.appendChild(row);
@@ -1251,9 +1257,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         
         detailContainer.querySelector('#detail-like-btn').addEventListener('click', (e) => {
-            if (window.toggleSongLike) {
-                window.toggleSongLike(song, e.currentTarget);
+            const btn = e.currentTarget;
+            const icon = btn.querySelector('i');
+            const idx = likedSongs.findIndex(s => s.id === song.id);
+            if (idx > -1) {
+                likedSongs.splice(idx, 1);
+                btn.style.color = 'var(--text-subdued)';
+                icon.className = 'far fa-heart';
+            } else {
+                likedSongs.push(song);
+                btn.style.color = 'var(--accent)';
+                icon.className = 'fas fa-heart';
             }
+            if (window.saveLikedSongs) window.saveLikedSongs();
         });
         
         document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view'));
@@ -1495,53 +1511,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     
-    window.toggleSongLike = function(song, btnElement) {
-        if (!song) return;
-        
-        if (!currentUser) {
-            alert("Please log in to like songs.");
-            if (authModal) authModal.style.display = 'flex';
-            return;
+    window.saveLikedSongs = function() {
+        if (currentUser) {
+            currentUser.likedSongs = likedSongs;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            // Save back to Users DB array
+            const dbIndex = usersDB.findIndex(u => u.id === currentUser.id);
+            if(dbIndex > -1) {
+                usersDB[dbIndex] = currentUser;
+                localStorage.setItem('usersDB', JSON.stringify(usersDB));
+            }
+        } else {
+            // For guests, we can still save to local storage or just keep in memory
+            localStorage.setItem('guestLikedSongs', JSON.stringify(likedSongs));
         }
+    };
+
+    function toggleLike() {
+        if (!currentActiveSong) return;
         
-        const index = likedSongs.findIndex(s => s.id === song.id);
-        const icon = btnElement ? btnElement.querySelector('i') : null;
-        
+        const index = likedSongs.findIndex(s => s.id === currentActiveSong.id);
         if (index > -1) {
             likedSongs.splice(index, 1);
-            if (icon) icon.className = 'far fa-heart';
-            if (btnElement && btnElement.id !== 'player-like-btn') btnElement.style.color = 'var(--text-subdued)';
         } else {
-            likedSongs.push(song);
-            if (icon) icon.className = 'fas fa-heart';
-            if (btnElement && btnElement.id !== 'player-like-btn') btnElement.style.color = 'var(--accent)';
+            likedSongs.push(currentActiveSong);
         }
         
-        // Save to current user
-        currentUser.likedSongs = likedSongs;
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
-        // Save back to Users DB array
-        const dbIndex = usersDB.findIndex(u => u.id === currentUser.id);
-        if(dbIndex > -1) {
-            usersDB[dbIndex] = currentUser;
-            localStorage.setItem('usersDB', JSON.stringify(usersDB));
-        }
-        
-        // Sync player like button if this is the active song
-        if (currentActiveSong && currentActiveSong.id === song.id) {
-            updateLikeButtonsState();
-        }
+        window.saveLikedSongs();
+        updateLikeButtonsState();
         
         // Refresh library view if active
         if (document.getElementById('library-view').classList.contains('active-view')) {
             renderLikedSongs();
         }
-    };
-    
-    function toggleLike() {
-        if (!currentActiveSong) return;
-        window.toggleSongLike(currentActiveSong, playerLikeBtn);
     }
     
     function updateLikeButtonsState() {
