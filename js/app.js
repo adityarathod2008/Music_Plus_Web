@@ -179,11 +179,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         
         // Hide other views and show this one
-        views.forEach(v => v.classList.remove('active'));
-        moodContainer.classList.add('active');
+        document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view'));
+        moodContainer.classList.add('active-view');
         
         // Auto-play the mood tracks instantly when selected
-        if (window.audioPlayer && moodTracks.length > 0) {
+        if (typeof audioPlayer !== 'undefined' && moodTracks.length > 0) {
             audioPlayer.queue = [...moodTracks];
             audioPlayer.playSong(moodTracks[0], 0);
         }
@@ -1256,8 +1256,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
         
-        views.forEach(v => v.classList.remove('active'));
-        detailContainer.classList.add('active');
+        document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view'));
+        detailContainer.classList.add('active-view');
     }
     
     function populateGenres() {
@@ -1432,7 +1432,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     function switchView(viewId) {
-        views.forEach(v => v.classList.remove('active-view'));
+        document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view'));
         
         if (viewId === 'search') {
             document.getElementById('search-view').classList.add('active-view');
