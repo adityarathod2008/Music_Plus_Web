@@ -1120,17 +1120,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             
             const likeBtn = row.querySelector('.trend-like-btn');
-            likeBtn.addEventListener('click', () => {
-                const idx = likedSongs.findIndex(s => s.id === song.id);
-                if (idx > -1) {
-                    likedSongs.splice(idx, 1);
-                    likeBtn.innerHTML = '<i class="far fa-heart"></i>';
-                } else {
-                    likedSongs.push(song);
-                    likeBtn.innerHTML = '<i class="fas fa-heart"></i>';
+            likeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (window.toggleSongLike) {
+                    window.toggleSongLike(song, likeBtn);
                 }
-                saveLikedSongs();
-                updateLikeButtonState();
             });
             
             if (madeForYou) madeForYou.appendChild(row);
@@ -1257,19 +1251,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         
         detailContainer.querySelector('#detail-like-btn').addEventListener('click', (e) => {
-            const btn = e.currentTarget;
-            const icon = btn.querySelector('i');
-            const idx = likedSongs.findIndex(s => s.id === song.id);
-            if (idx > -1) {
-                likedSongs.splice(idx, 1);
-                btn.style.color = 'var(--text-subdued)';
-                icon.className = 'far fa-heart';
-            } else {
-                likedSongs.push(song);
-                btn.style.color = 'var(--accent)';
-                icon.className = 'fas fa-heart';
+            if (window.toggleSongLike) {
+                window.toggleSongLike(song, e.currentTarget);
             }
-            if (window.saveLikedSongs) window.saveLikedSongs();
         });
         
         views.forEach(v => v.classList.remove('active'));
@@ -1511,8 +1495,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     
-    function toggleLike() {
-        if (!currentActiveSong) return;
+    window.toggleSongLike = function(song, btnElement) {
+        if (!song) return;
         
         if (!currentUser) {
             alert("Please log in to like songs.");
@@ -1520,11 +1504,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         
-        const index = likedSongs.findIndex(s => s.id === currentActiveSong.id);
+        const index = likedSongs.findIndex(s => s.id === song.id);
+        const icon = btnElement ? btnElement.querySelector('i') : null;
+        
         if (index > -1) {
             likedSongs.splice(index, 1);
+            if (icon) icon.className = 'far fa-heart';
+            if (btnElement && btnElement.id !== 'player-like-btn') btnElement.style.color = 'var(--text-subdued)';
         } else {
-            likedSongs.push(currentActiveSong);
+            likedSongs.push(song);
+            if (icon) icon.className = 'fas fa-heart';
+            if (btnElement && btnElement.id !== 'player-like-btn') btnElement.style.color = 'var(--accent)';
         }
         
         // Save to current user
@@ -1538,12 +1528,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             localStorage.setItem('usersDB', JSON.stringify(usersDB));
         }
         
-        updateLikeButtonsState();
+        // Sync player like button if this is the active song
+        if (currentActiveSong && currentActiveSong.id === song.id) {
+            updateLikeButtonsState();
+        }
         
         // Refresh library view if active
         if (document.getElementById('library-view').classList.contains('active-view')) {
             renderLikedSongs();
         }
+    };
+    
+    function toggleLike() {
+        if (!currentActiveSong) return;
+        window.toggleSongLike(currentActiveSong, playerLikeBtn);
     }
     
     function updateLikeButtonsState() {

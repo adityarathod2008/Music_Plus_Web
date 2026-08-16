@@ -193,6 +193,14 @@ window.initializeRecommendations = function() {
                     </div>
                 `;
                 
+                const likeBtn = row.querySelector('.trend-like-btn');
+                likeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (window.toggleSongLike) {
+                        window.toggleSongLike(song, likeBtn);
+                    }
+                });
+                
                 row.querySelector('.trending-row-info').addEventListener('click', () => {
                      if (window.renderTrackDetail) {
                          window.renderTrackDetail(song, mfySongs);
