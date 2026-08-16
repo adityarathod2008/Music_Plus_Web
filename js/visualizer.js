@@ -71,8 +71,13 @@ class AudioVisualizer {
             }
         }
         
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        // Cyber-industrial dark background with trailing effect
+        this.ctx.globalCompositeOperation = 'source-over';
+        this.ctx.fillStyle = 'rgba(5, 5, 5, 0.25)';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Add additive blending for glowing effect
+        this.ctx.globalCompositeOperation = 'screen';
         
         if (this.mode === 'bars') {
             this.drawBars();
@@ -90,20 +95,31 @@ class AudioVisualizer {
         for (let i = 0; i < this.bufferLength; i++) {
             const barHeight = (this.dataArray[i] / 255) * this.canvas.height;
             
-            const r = this.dataArray[i] + (25 * (i/this.bufferLength));
-            const g = 250 * (i/this.bufferLength);
-            const b = 50;
+            // Neon cyan to purple gradient
+            const r = (this.dataArray[i] / 255) * 255;
+            const g = 255 - (i / this.bufferLength) * 100;
+            const b = 204 + (i / this.bufferLength) * 51;
             
-            this.ctx.fillStyle = `rgb(${r},${g},${b})`;
-            this.ctx.fillRect(x, this.canvas.height - barHeight, barWidth, barHeight);
+            this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.8)`;
             
-            x += barWidth + 1;
+            // Add a glow by drawing a slightly larger, fainter rect behind
+            this.ctx.shadowBlur = 15;
+            this.ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 1)`;
+            
+            this.ctx.fillRect(x, this.canvas.height - barHeight, barWidth - 1, barHeight);
+            
+            // Reset shadow
+            this.ctx.shadowBlur = 0;
+            
+            x += barWidth;
         }
     }
 
     drawWave() {
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeStyle = 'rgb(29, 185, 84)';
+        this.ctx.lineWidth = 3;
+        this.ctx.strokeStyle = '#00ffcc';
+        this.ctx.shadowBlur = 20;
+        this.ctx.shadowColor = '#00ffcc';
         this.ctx.beginPath();
         
         const sliceWidth = this.canvas.width * 1.0 / this.bufferLength;
@@ -124,16 +140,18 @@ class AudioVisualizer {
         
         this.ctx.lineTo(this.canvas.width, this.canvas.height / 2);
         this.ctx.stroke();
+        this.ctx.shadowBlur = 0; // Reset
     }
 
     drawCircle() {
         const centerX = this.canvas.width / 2;
         const centerY = this.canvas.height / 2;
-        const radius = Math.min(centerX, centerY) - 20;
+        const radius = Math.min(centerX, centerY) - 40;
         
         this.ctx.beginPath();
         this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        this.ctx.strokeStyle = 'rgba(0, 255, 204, 0.2)';
+        this.ctx.lineWidth = 2;
         this.ctx.stroke();
         
         for (let i = 0; i < this.bufferLength; i++) {
@@ -145,12 +163,16 @@ class AudioVisualizer {
             const xEnd = centerX + Math.cos(rads * i) * (radius + barHeight);
             const yEnd = centerY + Math.sin(rads * i) * (radius + barHeight);
             
-            this.ctx.strokeStyle = `hsl(${(i/this.bufferLength) * 360}, 100%, 50%)`;
-            this.ctx.lineWidth = 2;
+            this.ctx.strokeStyle = `hsla(${160 + (i/this.bufferLength) * 60}, 100%, 50%, 0.8)`;
+            this.ctx.shadowBlur = 10;
+            this.ctx.shadowColor = this.ctx.strokeStyle;
+            this.ctx.lineWidth = 3;
+            
             this.ctx.beginPath();
             this.ctx.moveTo(x, y);
             this.ctx.lineTo(xEnd, yEnd);
             this.ctx.stroke();
         }
+        this.ctx.shadowBlur = 0;
     }
 }

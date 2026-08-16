@@ -1,21 +1,36 @@
 :root {
-    --bg-color-base: #070707;
-    --bg-color-secondary: #0b0b0b;
-    --bg-color-highlight: #111111;
-    --bg-color-elevated: #151515;
-    --bg-color-press: rgba(0, 0, 0, 0.5);
-    --text-highlight: #ffffff;
-    --text-base: #a7a7a7;
-    --text-subdued: #666666;
-    --border-color: rgba(255, 255, 255, 0.06);
-    --accent-color: #8b5cf6;
-    --accent-hover: #a78bfa;
-    --accent-secondary: #ec4899;
-    --essential-subdued: #52525b;
-    --error: #ef4444;
-    --player-height: 90px;
-    --sidebar-width: 250px;
+    /* New Design Tokens (Cyber-Industrial) */
+    --bg-primary: #050505; /* Near black */
+    --bg-secondary: #0a0a0a;
+    --bg-elevated: #121212;
+    --surface: #18181b; /* Dark charcoal */
+    --surface-hover: #27272a;
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa; /* Muted gray */
+    --text-muted: #52525b;
+    --accent: #00ffcc; /* Neon cyan/teal */
+    --accent-soft: rgba(0, 255, 204, 0.15);
+    --accent-secondary: #ff0055;
+    --border: rgba(255, 255, 255, 0.08);
+    
+    --player-height: 96px;
+    --sidebar-width: 240px;
     --drawer-width: 320px;
+
+    /* Legacy Mappings (To prevent breaking existing UI during transition) */
+    --bg-color-base: var(--bg-primary);
+    --bg-color-secondary: var(--bg-secondary);
+    --bg-color-highlight: var(--surface);
+    --bg-color-elevated: var(--bg-elevated);
+    --bg-color-press: rgba(0, 0, 0, 0.5);
+    --text-highlight: var(--text-primary);
+    --text-base: var(--text-secondary);
+    --text-subdued: var(--text-muted);
+    --border-color: var(--border);
+    --accent-color: var(--accent);
+    --accent-hover: #33ffdb;
+    --essential-subdued: var(--text-muted);
+    --error: #ef4444;
 }
 
 * {
@@ -64,70 +79,84 @@ body {
     background: rgba(255, 255, 255, 0.3);
 }
 
+/* Typography System */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.page-title { font-size: clamp(28px, 4vw, 36px); font-weight: 800; }
+.section-title, .shelf-header h2 { font-size: clamp(20px, 3vw, 24px); font-weight: 700; }
+.card-title, .artist-card h4, .hero-content h2 { font-size: 16px; font-weight: 600; }
+.metadata { font-size: 13px; color: var(--text-secondary); }
+
 /* Sidebar */
 .sidebar {
-    background: rgba(9, 9, 11, 0.6);
+    background: rgba(5, 5, 5, 0.7);
     backdrop-filter: blur(25px) saturate(180%);
     -webkit-backdrop-filter: blur(25px) saturate(180%);
     grid-column: 1 / 2;
     grid-row: 1 / 2;
     display: flex;
     flex-direction: column;
-    padding: 24px 12px;
-    gap: 20px;
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 24px 16px;
+    gap: 24px;
+    border-right: 1px solid var(--border);
     z-index: 10;
 }
 
 .logo {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     font-size: 24px;
-    font-weight: 700;
+    font-weight: 800;
     padding: 0 12px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     cursor: pointer;
+    letter-spacing: -1px;
 }
 
 .logo i {
-    font-size: 32px;
+    font-size: 28px;
+    color: var(--accent);
+    filter: drop-shadow(0 0 8px var(--accent-soft));
 }
 
 .nav-section {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-bottom: 12px;
 }
 
 .nav-section-title {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
-    color: var(--text-subdued);
-    letter-spacing: 1.2px;
+    color: var(--text-muted);
     padding: 0 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
     margin-bottom: 4px;
 }
 
-.nav-links, .nav-actions {
+.nav-links {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
 }
 
 .nav-links li, .nav-actions button {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
     padding: 10px 12px;
-    color: var(--text-base);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
     border-radius: 6px;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
     background: transparent;
     border: none;
     text-align: left;
@@ -135,26 +164,28 @@ body {
 }
 
 .nav-links li:hover, .nav-actions button:hover {
-    color: var(--text-highlight);
-    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    background: var(--surface-hover);
     transform: translateX(4px);
 }
 
 .nav-links li.active {
-    background: rgba(139, 92, 246, 0.12);
-    color: var(--text-highlight);
-    box-shadow: inset 3px 0 0 var(--accent-color);
+    color: var(--text-primary);
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    padding-left: 9px;
 }
 
 .nav-links i, .nav-actions i {
-    font-size: 20px;
+    font-size: 18px;
     width: 24px;
     text-align: center;
-    transition: color 0.3s;
+    transition: color 0.2s ease;
 }
 
 .nav-links li.active i {
-    color: var(--accent-color);
+    color: var(--accent);
+    filter: drop-shadow(0 0 8px var(--accent-soft));
 }
 
 .nav-actions {
@@ -1127,16 +1158,24 @@ body {
     left: var(--sidebar-width);
     right: 0;
     height: var(--player-height);
-    background: rgba(12, 12, 12, 0.92);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid var(--border);
     z-index: 100;
-    transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1), right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+}
+.player-dock::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-soft), transparent);
 }
 
 #app.drawer-open .player-dock {
@@ -1609,7 +1648,11 @@ body {
 
     .nav-links li {
         flex-direction: column;
-        padding: 8px 12px;
+        padding: 12px;
+        min-width: 44px;
+        min-height: 44px;
+        justify-content: center;
+        align-items: center;
         font-size: 10px;
         gap: 4px;
         color: var(--text-subdued);
@@ -1899,4 +1942,275 @@ body {
         width: 120px;
         height: 120px;
     }
+}
+
+/* =========================================
+   EXPANDED PLAYER
+   ========================================= */
+.player-dock.expanded {
+    height: 100vh;
+    left: 0;
+    z-index: 9999;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 24px;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+}
+
+#player-expanded-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -1;
+    background-size: cover;
+    background-position: center;
+    filter: blur(80px) brightness(0.3);
+    opacity: 0.8;
+}
+
+.player-dock.expanded .now-playing-info {
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 40px;
+}
+
+.player-dock.expanded .now-playing-info img {
+    width: min(80vw, 400px);
+    height: min(80vw, 400px);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    margin-bottom: 24px;
+}
+
+.player-dock.expanded .track-details {
+    align-items: center;
+    text-align: center;
+}
+
+.player-dock.expanded #track-title {
+    font-size: clamp(24px, 4vw, 32px);
+    font-weight: 800;
+}
+
+.player-dock.expanded #track-artist {
+    font-size: clamp(16px, 2vw, 18px);
+    opacity: 0.8;
+}
+
+.player-dock.expanded .player-controls-container {
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 32px;
+}
+
+.player-dock.expanded .playback-controls {
+    gap: 32px;
+    margin-bottom: 24px;
+}
+
+.player-dock.expanded .play-btn {
+    width: 64px;
+    height: 64px;
+    font-size: 24px;
+}
+
+.player-dock.expanded .progress-container {
+    padding: 0 20px;
+}
+
+.player-dock.expanded .extra-controls {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    width: auto;
+}
+
+.player-dock.expanded #fullscreen-btn {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    font-size: 24px;
+}
+
+/* =========================================
+   HOME PAGE HERO REDESIGN
+   ========================================= */
+.hero-section {
+    margin-bottom: 40px;
+}
+
+.hero-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, var(--surface-hover), var(--bg-secondary));
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 40px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hero-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 40px var(--accent-soft);
+}
+
+.hero-content {
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.hero-tag {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.hero-content h2 {
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 900;
+    color: var(--text-primary);
+    line-height: 1.1;
+    letter-spacing: -1px;
+}
+
+.hero-content p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 8px;
+    max-width: 400px;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.hero-play-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px var(--accent-soft);
+}
+
+.hero-play-btn:hover {
+    background: var(--text-primary);
+    transform: scale(1.05);
+}
+
+.hero-add-btn {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.hero-add-btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--text-secondary);
+}
+
+.hero-artwork {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-artwork img {
+    width: 200px;
+    height: 200px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.hero-card:hover .hero-artwork img {
+    transform: scale(1.03) rotate(2deg);
+}
+
+.hero-artwork-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, var(--accent-soft) 0%, transparent 70%);
+    z-index: -1;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+.hero-card:hover .hero-artwork-glow {
+    opacity: 0.8;
+}
+
+/* Empty States & Skeletons */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 20px;
+    text-align: center;
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px dashed var(--border);
+    margin-top: 20px;
+}
+.empty-state h3 {
+    font-size: 20px;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+.empty-state p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 24px;
+}
+.empty-state .cta-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 20px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* Skeleton Loading */
+.skeleton {
+    background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 50%, var(--surface) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 4px;
+}
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }

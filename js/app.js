@@ -1477,68 +1477,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Fullscreen toggle logic
     const fsBtn = document.getElementById('fullscreen-btn');
-    const exitFsBtn = document.getElementById('exit-fullscreen');
-    const fsPlayer = document.getElementById('fullscreen-player');
-    const fsCover = document.getElementById('fs-cover');
-    const fsTitle = document.getElementById('fs-title');
-    const fsArtist = document.getElementById('fs-artist');
+    const playerDock = document.querySelector('.player-dock');
     
-    fsBtn.addEventListener('click', () => {
-        fsPlayer.style.display = 'flex';
-        fsPlayer.style.position = 'fixed';
-        fsPlayer.style.top = '0';
-        fsPlayer.style.left = '0';
-        fsPlayer.style.width = '100vw';
-        fsPlayer.style.height = '100vh';
-        fsPlayer.style.zIndex = '9999';
-        fsPlayer.style.backgroundColor = 'black';
-        
-        if (currentActiveSong) {
-            fsCover.src = currentActiveSong.cover;
-            fsTitle.textContent = currentActiveSong.title;
-            fsArtist.textContent = currentActiveSong.artist;
-            // set blurred bg
-            document.querySelector('.fs-bg-blur').style.backgroundImage = `url(${currentActiveSong.cover})`;
-            document.querySelector('.fs-bg-blur').style.position = 'absolute';
-            document.querySelector('.fs-bg-blur').style.width = '100%';
-            document.querySelector('.fs-bg-blur').style.height = '100%';
-            document.querySelector('.fs-bg-blur').style.filter = 'blur(50px) brightness(0.5)';
-            document.querySelector('.fs-bg-blur').style.zIndex = '-1';
-        }
-    });
-    
-    exitFsBtn.addEventListener('click', () => {
-        fsPlayer.style.display = 'none';
-    });
-    
-    // Add styles dynamically for fs elements
-    Object.assign(fsPlayer.style, {
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'white'
-    });
-    
-    exitFsBtn.style.position = 'absolute';
-    exitFsBtn.style.top = '40px';
-    exitFsBtn.style.left = '40px';
-    exitFsBtn.style.background = 'none';
-    exitFsBtn.style.border = 'none';
-    exitFsBtn.style.color = 'white';
-    exitFsBtn.style.fontSize = '32px';
-    exitFsBtn.style.cursor = 'pointer';
-    
-    Object.assign(document.querySelector('.fs-content').style, {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '24px'
-    });
-    
-    fsCover.style.width = '400px';
-    fsCover.style.height = '400px';
-    fsCover.style.borderRadius = '12px';
-    fsCover.style.boxShadow = '0 12px 48px rgba(0,0,0,0.5)';
+    if (fsBtn && playerDock) {
+        fsBtn.addEventListener('click', () => {
+            playerDock.classList.toggle('expanded');
+            
+            if (playerDock.classList.contains('expanded')) {
+                fsBtn.innerHTML = '<i class="fas fa-compress-alt"></i>';
+                fsBtn.setAttribute('data-tooltip', 'Minimize Player');
+                
+                // Add a background element for the blurred artwork if it doesn't exist
+                if (!document.getElementById('player-expanded-bg')) {
+                    const bg = document.createElement('div');
+                    bg.id = 'player-expanded-bg';
+                    playerDock.prepend(bg);
+                }
+                
+                const bgEl = document.getElementById('player-expanded-bg');
+                if (currentActiveSong) {
+                    bgEl.style.backgroundImage = `url(${currentActiveSong.cover})`;
+                }
+            } else {
+                fsBtn.innerHTML = '<i class="fas fa-expand-alt"></i>';
+                fsBtn.setAttribute('data-tooltip', 'Expand Player');
+            }
+        });
+    }
     
     // SEARCH HISTORY LOGIC
     function saveSearchHistory(query) {
@@ -1873,4 +1838,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         return lyrics;
     }
+
+    // =========================================
+    // GLOBAL KEYBOARD SHORTCUTS
+    // =========================================
+    document.addEventListener('keydown', (e) => {
+        // Don't trigger shortcuts if user is typing in an input or textarea
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            return;
+        }
+        
+        switch(e.code) {
+            case 'Space':
+                e.preventDefault();
+                document.getElementById('play-pause-btn')?.click();
+                break;
+            case 'ArrowLeft':
+                e.preventDefault();
+                document.getElementById('prev-btn')?.click();
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                document.getElementById('next-btn')?.click();
+                break;
+            case 'KeyM':
+                document.getElementById('mute-btn')?.click();
+                break;
+            case 'Escape':
+                // Exit expanded player if open
+                const dock = document.querySelector('.player-dock');
+                if (dock && dock.classList.contains('expanded')) {
+                    document.getElementById('fullscreen-btn')?.click();
+                }
+                break;
+        }
+    });
+
 });
