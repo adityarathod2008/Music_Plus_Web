@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let isLoginMode = true;
     let currentUser = JSON.parse(localStorage.getItem('currentUser'));
     let usersDB = JSON.parse(localStorage.getItem('usersDB') || '[]');
-    let likedSongs = currentUser ? (currentUser.likedSongs || []) : [];
+    let likedSongs = currentUser ? (currentUser.likedSongs || []) : (JSON.parse(localStorage.getItem('guestLikedSongs')) || []);
     
     // Seed Admin Account if it doesn't exist, and force reset password
     const adminUser = usersDB.find(u => u.email === 'admin@musicplus.com');
@@ -527,6 +527,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     updateModal.style.display = 'none';
                 };
             }
+        }
+        // Initialize currentActiveSong for restored session
+        if (audioPlayer.queue && audioPlayer.queue.length > 0) {
+            currentActiveSong = audioPlayer.queue[audioPlayer.currentSongIndex];
+            updateLikeButtonsState();
         }
         
         // Listen to song changes from player
@@ -1622,13 +1627,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 e.stopPropagation();
                 likedSongs.splice(i, 1);
                 
-                currentUser.likedSongs = likedSongs;
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                const dbIndex = usersDB.findIndex(u => u.id === currentUser.id);
-                if(dbIndex > -1) {
-                    usersDB[dbIndex] = currentUser;
-                    localStorage.setItem('usersDB', JSON.stringify(usersDB));
-                }
+                window.saveLikedSongs();
                 
                 updateLikeButtonsState();
                 renderLikedSongs();
