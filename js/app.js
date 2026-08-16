@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const firstSong = songs[0];
                         if (!likedSongs.find(s => s.id === firstSong.id)) {
                             likedSongs.push(firstSong);
-                            saveLikedSongs();
+                            window.saveLikedSongs();
                             heroAddBtn.innerHTML = '<i class="fas fa-check"></i> Added';
                             heroAddBtn.style.background = 'var(--text-base)';
                             heroAddBtn.style.color = 'black';
@@ -507,7 +507,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const firstSong = songs[0];
                     if (!likedSongs.find(s => s.id === firstSong.id)) {
                         likedSongs.push(firstSong);
-                        saveLikedSongs();
+                        window.saveLikedSongs();
                         heroAddBtn.innerHTML = '<i class="fas fa-check"></i> Added';
                         heroAddBtn.style.background = 'var(--text-base)';
                         heroAddBtn.style.color = 'black';
@@ -1129,8 +1129,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     likedSongs.push(song);
                     likeBtn.innerHTML = '<i class="fas fa-heart"></i>';
                 }
-                saveLikedSongs();
-                updateLikeButtonState();
+                window.saveLikedSongs();
+                updateLikeButtonsState();
             });
             
             if (madeForYou) madeForYou.appendChild(row);
@@ -1548,7 +1548,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     function updateLikeButtonsState() {
-        if (!currentActiveSong || !currentUser) {
+        if (!currentActiveSong) {
             playerLikeBtn.classList.remove('liked');
             playerLikeBtn.innerHTML = '<i class="far fa-heart"></i>';
             drawerLikeBtn.classList.remove('liked');
