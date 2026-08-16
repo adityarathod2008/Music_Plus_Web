@@ -1,14 +1,14 @@
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=timeGradient&height=250&section=header&text=🌐%20MusicPlus%20Web&fontSize=60&animation=twinkling&fontAlignY=35&desc=The%20Web%20Streaming%20Frontend&descAlignY=55&descAlign=50" width="100%" alt="Header Banner" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=timeGradient&height=250&section=header&text=🌐%20MUGICHOLIC&fontSize=60&animation=twinkling&fontAlignY=35&desc=The%20Web%20Streaming%20Frontend&descAlignY=55&descAlign=50" width="100%" alt="Header Banner" />
 </div>
 
 <br>
 
-## 🚀 About Music_Plus_Web
+## 🚀 About MUGICHOLIC
 
-**Music_Plus_Web** is the standalone frontend web version of the MusicPlus streaming platform. This repository is optimized specifically for fast, responsive web browsing and cloud deployments (such as Vercel).
+**MUGICHOLIC** is the standalone frontend web version of the MUGICHOLIC streaming platform. This repository is optimized specifically for fast, responsive web browsing and cloud deployments (such as Vercel).
 
-If you are looking for the full version which includes the Desktop (Python) application and core backend files, please check out the main [MusicPlus](https://github.com/adityarathod2008/MusicPlus) repository.
+If you are looking for the full version which includes the Desktop (Python) application and core backend files, please check out the main [MUGICHOLIC](https://github.com/adityarathod2008/MusicPlus) repository.
 
 ---
 

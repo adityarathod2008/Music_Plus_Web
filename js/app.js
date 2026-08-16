@@ -772,14 +772,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.preventDefault();
             isLoginMode = !isLoginMode;
             if (isLoginMode) {
-                authTitle.textContent = "Log in to Music+";
+                authTitle.textContent = "Log in to MUGICHOLIC";
                 authSubmitBtn.textContent = "Log In";
                 authToggleText.textContent = "Don't have an account?";
                 authToggleLink.textContent = "Sign up";
                 usernameGroup.style.display = 'none';
                 usernameInput.required = false;
             } else {
-                authTitle.textContent = "Sign up for Music+";
+                authTitle.textContent = "Sign up for MUGICHOLIC";
                 authSubmitBtn.textContent = "Sign Up";
                 authToggleText.textContent = "Already have an account?";
                 authToggleLink.textContent = "Log in";
@@ -966,7 +966,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // Switch back to login view but leave the success message visible
                 isLoginMode = true;
-                authTitle.textContent = "Log in to Music+";
+                authTitle.textContent = "Log in to MUGICHOLIC";
                 authSubmitBtn.textContent = "Log In";
                 authToggleText.textContent = "Don't have an account?";
                 authToggleLink.textContent = "Sign up";

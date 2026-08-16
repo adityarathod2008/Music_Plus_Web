@@ -323,5 +323,5 @@ def get_artist(browse_id):
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    print("Starting Music+ Backend Server on http://127.0.0.1:5000")
+    print("Starting MUGICHOLIC Backend Server on http://127.0.0.1:5000")
     app.run(host='127.0.0.1', port=5000, debug=True)
