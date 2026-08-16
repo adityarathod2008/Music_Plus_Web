@@ -1514,6 +1514,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     function toggleLike() {
         if (!currentActiveSong) return;
         
+        if (!currentUser) {
+            alert("Please log in to like songs.");
+            if (authModal) authModal.style.display = 'flex';
+            return;
+        }
+        
         const index = likedSongs.findIndex(s => s.id === currentActiveSong.id);
         if (index > -1) {
             likedSongs.splice(index, 1);
