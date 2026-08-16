@@ -25,7 +25,7 @@ self.addEventListener('fetch', event => {
   if (event.request.url.includes('/stream/') || event.request.url.includes('/search') || event.request.url.includes('youtube')) {
     return;
   }
-  
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
